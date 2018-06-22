@@ -90,6 +90,7 @@ else
   cp ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
   cp ./bulwark-$BWKVERSION/bulwark-tx /usr/local/bin
   rm -rf bulwark-$BWKVERSION
+fi
 
   # Create .bulwark directory
 mkdir $USERHOME/.bulwark
