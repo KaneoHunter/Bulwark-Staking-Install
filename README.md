@@ -23,15 +23,15 @@ This deletes the document containing your passwords and import keys, making sure
 
 # Userful Commands
 
-Start the wallet - `systemctl start bulwarkd`
-Stop the wallet - `systemctl stop bulwarkd`
-Restart the wallet - `systemctl restart bulwarkd`
-Upload a debug log for devs/mods to look at (copy/paste us the output it gives!) - `curl --upload-file ~/.bulwark/debug.log https://transfer.sh/debug.log`
-Unlock your wallet for staking - `bulwark-cli walletpassphrase '<YOUR PASSWORD>' 99999999 true`
-Find out if staking is working - `bulwark-cli getstakingstatus`
-See your current balance - `bulwark-cli getbalance`
-Find out information about your wallet - `bulwark-cli getinfo`
-Change the split-threshold for your staking transactions (default 2000) - `setstakesplitthreshold <# to split at>`
+Start the wallet - `systemctl start bulwarkd`  
+Stop the wallet - `systemctl stop bulwarkd`  
+Restart the wallet - `systemctl restart bulwarkd`  
+Upload a debug log for devs/mods to look at (copy/paste us the output it gives!) - `curl --upload-file ~/.bulwark/debug.log https://transfer.sh/debug.log`  
+Unlock your wallet for staking - `bulwark-cli walletpassphrase '<YOUR PASSWORD>' 99999999 true`  
+Find out if staking is working - `bulwark-cli getstakingstatus`  
+See your current balance - `bulwark-cli getbalance`  
+Find out information about your wallet - `bulwark-cli getinfo`  
+Change the split-threshold for your staking transactions (default 2000) - `setstakesplitthreshold <# to split at>`  
 
 # Troubleshooting
 
@@ -91,7 +91,7 @@ This is asking if your transaction is old enough to be staked. It takes 60 minut
 
 This is making sure you have more than 1 BWK in the wallet. If this is appearing false there are a wide number of potential problems. It's best to come ask us in Discord or Telegram linked on our website (https://bulwarkcrypto.com/) if you have issues with this.
 
-## "mnsync"
+## "Mnsync"
 
 This just makes sure your wallet is fully synced, if you appear to be fully synced I'd recomment typing:
 
