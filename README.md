@@ -21,7 +21,7 @@ rm -Rf ~/.bulwark/StakingInfoReadMe.txt
 
 This deletes the document containing your passwords and import keys, making sure your VPS is as safe as possible.
 
-# Userful Commands
+# Useful Commands
 
 Start the wallet - `systemctl start bulwarkd`  
 Stop the wallet - `systemctl stop bulwarkd`  
