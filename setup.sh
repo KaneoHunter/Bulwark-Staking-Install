@@ -2,7 +2,7 @@
 
 # Set these to change the version of Bulwark to install
 
-VPSTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.2.4/bulwark-1.2.4.0-linux64.tar.gz"
+VPSTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bulwark-1.3.0.0-linux64.tar.gz"
 VPSTARBALLNAME="bulwark-1.3.0.0-linux64.tar.gz"
 SHNTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bulwark-1.3.0.0-ARMx64.tar.gz"
 SHNTARBALLNAME="bulwark-1.3.0.0-ARMx64.tar.gz"
