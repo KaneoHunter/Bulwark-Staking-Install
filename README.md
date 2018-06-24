@@ -37,9 +37,15 @@ Change the split-threshold for your staking transactions (default 2000) - `setst
 
 Most issues with the wallet can be resolved by running the below:
 
-`bash <( curl https://raw.githubusercontent.com/bulwark-crypto/Bulwark-MN-Install/master/refresh_node.sh )`
+`bash <( curl https://raw.githubusercontent.com/KaneoHunter/Bulwark-Staking-Install/master/refresh.sh )`
 
 This is like a "factory reset" button.
+
+# Updating the wallet
+
+To update your wallet to the latest version of Bulwark, please run the below:
+
+`bash <( curl https://raw.githubusercontent.com/KaneoHunter/Bulwark-Staking-Install/master/update.sh )`
 
 # Troubleshooting
 

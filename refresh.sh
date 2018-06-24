@@ -50,3 +50,5 @@ until su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\
 done
 
 clear
+
+echo "Your wallet has been refreshed, synced, and restarted!"

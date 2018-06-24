@@ -1,7 +1,9 @@
 #!/bin/bash
 
-TARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bulwark-1.3.0.0-linux64.tar.gz"
-TARBALLNAME="bulwark-1.3.0.0-linux64.tar.gz"
+VPSTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bulwark-1.3.0.0-linux64.tar.gz"
+VPSTARBALLNAME="bulwark-1.3.0.0-linux64.tar.gz"
+SHNTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bulwark-1.3.0.0-ARMx64.tar.gz"
+SHNTARBALLNAME="bulwark-1.3.0.0-ARMx64.tar.gz"
 BWKVERSION="1.3.0.0"
 
 CHARS="/-\|"
@@ -26,14 +28,25 @@ else
   su -c "bulwark-cli stop" $USER
 fi
 
-echo "Installing Bulwark $BWKVERSION..."
-mkdir ./bulwark-temp && cd ./bulwark-temp
-wget $TARBALLURL
-tar -xzvf $TARBALLNAME && mv bin bulwark-$BWKVERSION
-yes | cp -rf ./bulwark-$BWKVERSION/bulwarkd /usr/local/bin
-yes | cp -rf ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
-cd ..
-rm -rf ./bulwark-temp
+if [ -z $(cat /proc/cpuinfo | grep ARMv7) ]; then
+  # Install Bulwark daemon for x86 systems
+  wget $VPSTARBALLURL
+  tar -xzvf $VPSTARBALLNAME && mv bin bulwark-$BWKVERSION
+  rm $VPSTARBALLNAME
+  cp ./bulwark-$BWKVERSION/bulwarkd /usr/local/bin
+  cp ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
+  cp ./bulwark-$BWKVERSION/bulwark-tx /usr/local/bin
+  rm -rf bulwark-$BWKVERSION
+else
+  # Install Bulwark daemon for ARMv7 systems
+  wget $SHNTARBALLURL
+  tar -xzvf $SHNTARBALLNAME && mv bin bulwark-$BWKVERSION
+  rm $SHNTARBALLNAME
+  cp ./bulwark-$BWKVERSION/bulwarkd /usr/local/bin
+  cp ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
+  cp ./bulwark-$BWKVERSION/bulwark-tx /usr/local/bin
+  rm -rf bulwark-$BWKVERSION
+fi
 
 if [ -e /usr/bin/bulwarkd ];then rm -rf /usr/bin/bulwarkd; fi
 if [ -e /usr/bin/bulwark-cli ];then rm -rf /usr/bin/bulwark-cli; fi
