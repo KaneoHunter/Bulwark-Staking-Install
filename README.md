@@ -33,6 +33,14 @@ See your current balance - `bulwark-cli getbalance`
 Find out information about your wallet - `bulwark-cli getinfo`  
 Change the split-threshold for your staking transactions (default 2000) - `setstakesplitthreshold <# to split at>`  
 
+# Refreshing the wallet
+
+Most issues with the wallet can be resolved by running the below:
+
+`bash <( curl https://raw.githubusercontent.com/bulwark-crypto/Bulwark-MN-Install/master/refresh_node.sh )`
+
+This is like a "factory reset" button.
+
 # Troubleshooting
 
 To make sure your wallet is staking, the 1st step is to use the following command:
