@@ -116,7 +116,7 @@ EOL
 chmod 0600 $USERHOME/.bulwark/bulwark.conf
 chown -R $USER:$USER $USERHOME/.bulwark
 
-sleep 1
+sleep 5
 
 cat > /etc/systemd/system/bulwarkd.service << EOL
 [Unit]
@@ -140,7 +140,9 @@ systemctl enable bulwarkd
 echo "Starting bulwarkd..."
 systemctl start bulwarkd
 
-sleep 10
+until [ -n "$(bulwark-cli getconnectioncount 2>/dev/null)"  ]; do
+  sleep 1
+done
 
 if ! systemctl status bulwarkd | grep -q "active (running)"; then
   echo "ERROR: Failed to start bulwarkd. Please contact support."
@@ -211,7 +213,7 @@ bulwark-cli encryptwallet $ENCRYPTIONKEY && echo "Wallet successfully encrypted!
 #Wait for bulwarkd to close down after wallet encryption
 echo "Waiting for bulwarkd to restart..."
 until  ! systemctl is-active --quiet bulwarkd; do
-    sleep 0.5
+    sleep 2
 done
 
 #Open up bulwarkd again
