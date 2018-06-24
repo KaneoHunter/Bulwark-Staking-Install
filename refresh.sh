@@ -1,7 +1,7 @@
 #!/bin/bash
 
 clear
-echo "This script will refresh your masternode."
+echo "This script will refresh your wallet."
 read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s
 clear
 
@@ -19,7 +19,7 @@ else
   su -c "bulwark-cli stop" $BWKUSER
 fi
 
-echo "Refreshing node, please wait."
+echo "Refreshing wallet, please wait."
 
 sleep 5
 
@@ -37,7 +37,7 @@ else
   su -c "bulwarkd -daemon" $USER
 fi
 
-echo "Your masternode is syncing. Please wait for this process to finish."
+echo "Your wallet is syncing. Please wait for this process to finish."
 echo "This can take up to a few hours. Do not close this window." && echo ""
 
 until [  $(bulwark-cli getconnectioncount) -gt 0  ] 2>/dev/nul; do
@@ -50,27 +50,3 @@ until su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\
 done
 
 clear
-
-cat << EOL
-
-Now, you need to start your masternode. Please go to your desktop wallet and
-enter the following line into your debug console:
-
-startmasternode alias false <mymnalias>
-
-where <mymnalias> is the name of your masternode alias (without brackets)
-
-EOL
-
-read -p "Press Enter to continue after you've done that. " -n1 -s
-
-clear
-
-sleep 1
-su -c "/usr/local/bin/bulwark-cli startmasternode local false" $USER
-sleep 1
-clear
-su -c "/usr/local/bin/bulwark-cli masternode status" $USER
-sleep 5
-
-echo "" && echo "Masternode refresh completed." && echo ""

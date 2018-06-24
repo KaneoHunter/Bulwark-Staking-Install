@@ -7,7 +7,7 @@ BWKVERSION="1.3.0.0"
 CHARS="/-\|"
 
 clear
-echo "This script will update your masternode to version $BWKVERSION"
+echo "This script will update your wallet to version $BWKVERSION"
 read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s
 clear
 
@@ -19,7 +19,7 @@ fi
 USER=`ps u $(pgrep bulwarkd) | grep bulwarkd | cut -d " " -f 1`
 USERHOME=`eval echo "~$USER"`
 
-echo "Shutting down masternode..."
+echo "Shutting down wallet..."
 if [ -e /etc/systemd/system/bulwarkd.service ]; then
   systemctl stop bulwarkd
 else
@@ -75,9 +75,13 @@ EOL
 sudo systemctl enable bulwarkd
 sudo systemctl start bulwarkd
 
+until [ -n "$(bulwark-cli getconnectioncount 2>/dev/null)"  ]; do
+  sleep 1
+done
+
 clear
 
-echo "Your masternode is syncing. Please wait for this process to finish."
+echo "Your wallet is syncing. Please wait for this process to finish."
 
 until su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" $USER; do
   for (( i=0; i<${#CHARS}; i++ )); do
@@ -88,25 +92,4 @@ done
 
 clear
 
-cat << EOL
-
-Now, you need to start your masternode. Please go to your desktop wallet and
-enter the following line into your debug console:
-
-startmasternode alias false <mymnalias>
-
-where <mymnalias> is the name of your masternode alias (without brackets)
-
-EOL
-
-read -p "Press Enter to continue after you've done that. " -n1 -s
-
-clear
-
-su -c "bulwark-cli masternode status" $USER
-
-cat << EOL
-
-Masternode update completed.
-
-EOL
+echo "Your wallet is now up to date!"
