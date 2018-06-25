@@ -161,8 +161,8 @@ echo "Your node has been set up, now setting up staking.."
 sleep 5
 
 #Ensure bulwarkd is active
-if systemctl is-active --quiet bulwarkd; then
-	systemctl start bulwarkd
+  if systemctl is-active --quiet bulwarkd; then
+  	systemctl start bulwarkd
 fi
 echo "Setting Up Staking Address.."
 
@@ -181,9 +181,9 @@ touch ~/.bulwark/bulwark.conf
 sed 's/staking=0/staking=1/' <~/.bulwark/bulwark.conf
 
 if grep -Fxq "staking=1" ~/.bulwark/bulwark.conf; then
-	echo "Staking Already Active"
-else
-	echo "staking=1" >> ~/.bulwark/bulwark.conf
+  	echo "Staking Already Active"
+  else
+  	echo "staking=1" >> ~/.bulwark/bulwark.conf
 fi
 
 #Generates new address and assigns it a variable
@@ -213,7 +213,7 @@ bulwark-cli encryptwallet $ENCRYPTIONKEY && echo "Wallet successfully encrypted!
 #Wait for bulwarkd to close down after wallet encryption
 echo "Waiting for bulwarkd to restart..."
 until  ! systemctl is-active --quiet bulwarkd; do
-    sleep 2
+    sleep 0.5
 done
 
 #Open up bulwarkd again
@@ -222,30 +222,60 @@ systemctl start bulwarkd
 #Unlocks the wallet for a long time period
 bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true
 
-#Write readme file with further info/instructions.
-touch ~/.bulwark/StakingInfoReadMe.txt
-cat > ~/.bulwark/StakingInfoReadMe.txt << EOL
-Your wallet has now been set up for staking, please send the coins you wish to stake to ${STAKINGADDRESS}. Once your wallet is synced your coins should begin staking automatically.
+#Make decrypt script
+cd ~/.bulwark
+sudo wget https://raw.githubusercontent.com/KaneoHunter/shn/master/decrypt.sh
+cp ~/.bulwark/decrypt.sh /usr/bin/local/bin/decrypt.sh
+chown $USER:$USER /usr/local/bin/decrypt.sh
+chmod 700 /usr/local/bin/decrypt.sh
+rm -Rf ~/.bulwark/decrypt.sh
 
-To check on the status of your staked coins you can run "bulwark-cli getstakingstatus" and "bulwark-cli getinfo". To see when you receive your rewards from your QT wallet, you can also add a watch-only address from your debug console using "importaddress ${STAKINGADDRESS} StakingRewards".
 
-You can also import the private key for this address in to your QT wallet using the BIP38 tool under settings, just enter the information here with the password you chose at the start.
+#Output more
+cat << EOL
+Your wallet has now been set up for staking, please send the coins you wish to
+stake to ${STAKINGADDRESS}. Once your wallet is synced your coins should begin
+staking automatically.
+
+To check on the status of your staked coins you can run
+"bulwark-cli getstakingstatus" and "bulwark-cli getinfo".
+
+You can import the private key for this address in to your QT wallet using
+the BIP38 tool under settings, just enter the information below with the
+password you chose at the start. We recommend you take note of the following
+lines to assist with recovery if ever needed.
 
 ${BIP38}
 
-If your bulwarkd restarts, and you need to unlock your wallet again, use "bulwark-cli walletpassphrase ${ENCRYPTIONKEY} 9999999999 true"
+If your bulwarkd restarts, and you need to unlock your wallet again, use
+the included script by running "decrypt.sh" to unlock your
+wallet securely.
 
-Finally, to send the coins elsewhere if you no longer wish to stake them, use "bulwark-cli walletpassphrase ${ENCRYPTIONKEY} 600 false" and then run "bulwark-cli sendfrom ${STAKINGADDRESS} <Address You Want To Send To> <Amount>" which will return the transaction hash to trace
-the transaction on a block explorer, and will automatically propagate the transaction around the network.
+After the installation script ends, we will wipe all history and have no
+storage record of your password, encrypted key, or addresses.
+Any funds you lose access to are your own responsibility and the Bulwark team
+will be unable to assist with their recovery. We therefore suggesting saving a
+physical copy of this information.
 
-All of these instruction will be available from the Github page, and in the Bulwark Discord/Telegram on request!
-
-https://github.com/KaneoHunter/shn/blob/staking/README.md#staking-setup
+If you have any concerns, we encourage you to contact us via any of our
+social media channels.
 
 EOL
 
+read -e -p "Please confirm you have written down your password and encrypted key somewhere
+safe by typing \"I have read the above and agree\" : " CONFIRMATION
+
+until [  "$CONFIRMATION" = "I have read the above and agree"  ]; do
+  if [  "$CONFIRMATION" != "I have read the above and agree"  ]; then
+    read -e -p "Please confirm you have written down your password and encrypted key somewhere
+    safe by typing \"I have read the above and agree\" : " CONFIRMATION
+
+echo "Thank you for installing your Bulwark staking wallet, now finishing installation.."
+
+unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
+
+cat /dev/null > ~/.bash_history && history -c
+
 clear
 
-cat ~/.bulwark/StakingInfoReadMe.txt
-
-cat /dev/null > ~/.bash_history && history -c && exit
+echo "Staking wallet operational."
