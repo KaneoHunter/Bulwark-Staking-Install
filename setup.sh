@@ -10,12 +10,6 @@ BWKVERSION="1.3.0.0"
 BOOTSTRAPURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bootstrap.dat.xz"
 BOOTSTRAPARCHIVE="bootstrap.dat.xz"
 
-# Check if we are root
-if [ "$(id -u)" != "0" ]; then
-   echo "This script must be run as root." 1>&2
-   exit 1
-fi
-
 # Check if we have enough memory
 if [[ `free -m | awk '/^Mem:/{print $2}'` -lt 850 ]]; then
   echo "This installation requires at least 1GB of RAM.";
@@ -136,9 +130,9 @@ StartLimitBurst=3
 [Install]
 WantedBy=multi-user.target
 EOL
-systemctl enable bulwarkd
+sudo systemctl enable bulwarkd
 echo "Starting bulwarkd..."
-systemctl start bulwarkd
+sudo systemctl start bulwarkd
 
 until [ -n "$(bulwark-cli getconnectioncount 2>/dev/null)"  ]; do
   sleep 1
@@ -162,7 +156,7 @@ sleep 5
 
 #Ensure bulwarkd is active
   if systemctl is-active --quiet bulwarkd; then
-  	systemctl start bulwarkd
+  	sudo systemctl start bulwarkd
 fi
 echo "Setting Up Staking Address.."
 
@@ -217,7 +211,7 @@ until  ! systemctl is-active --quiet bulwarkd; do
 done
 
 #Open up bulwarkd again
-systemctl start bulwarkd
+sudo systemctl start bulwarkd
 
 #Unlocks the wallet for a long time period
 bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true
