@@ -9,7 +9,6 @@ read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s
 clear
 
 USER=$(whoami)
-USERHOME=home/$USER
 
 sudo systemctl stop bulwarkd
 
@@ -17,16 +16,16 @@ echo "Refreshing node, please wait."
 
 sleep 5
 
-sudo rm -Rf $USERHOME/.bulwark/blocks
-sudo rm -Rf $USERHOME/.bulwark/database
-sudo rm -Rf $USERHOME/.bulwark/chainstate
-sudo rm -Rf $USERHOME/.bulwark/peers.dat
+sudo rm -Rf $HOME/.bulwark/blocks
+sudo rm -Rf $HOME/.bulwark/database
+sudo rm -Rf $HOME/.bulwark/chainstate
+sudo rm -Rf $HOME/.bulwark/peers.dat
 
-sudo cp $USERHOME/.bulwark/bulwark.conf $USERHOME/.bulwark/bulwark.conf.backup
-sudo sed -i '/^addnode/d' $USERHOME/.bulwark/bulwark.conf
+sudo cp $HOME/.bulwark/bulwark.conf $HOME/.bulwark/bulwark.conf.backup
+sudo sed -i '/^addnode/d' $HOME/.bulwark/bulwark.conf
 
 echo "Installing bootstrap file..."
-wget $BOOTSTRAPURL && xz -cd $BOOTSTRAPARCHIVE > $USERHOME/.bulwark/bootstrap.dat && rm $BOOTSTRAPARCHIVE
+wget $BOOTSTRAPURL && xz -cd $BOOTSTRAPARCHIVE > $HOME/.bulwark/bootstrap.dat && rm $BOOTSTRAPARCHIVE
 
 sudo systemctl start bulwarkd
 
