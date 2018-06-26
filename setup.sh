@@ -22,6 +22,11 @@ if [[ `df -k --output=avail / | tail -n1` -lt 10485760 ]]; then
   exit 1
 fi
 
+clear
+echo "This script will install a staking wallet."
+read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s
+clear
+
 # Install tools for dig and systemctl
 echo "Preparing installation..."
 sudo apt-get install git dnsutils systemd -y > /dev/null 2>&1
