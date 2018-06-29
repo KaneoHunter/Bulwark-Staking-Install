@@ -31,6 +31,10 @@ clear
 echo "Preparing installation..."
 sudo apt-get install git dnsutils systemd -y > /dev/null 2>&1
 
+# Make sure curl is installed
+apt -qqy install curl
+clear
+
 # Check for systemd
 sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
 
@@ -96,7 +100,7 @@ echo "Installing bootstrap file..."
 wget $BOOTSTRAPURL && xz -cd $BOOTSTRAPARCHIVE > $HOME/.bulwark/bootstrap.dat && rm $BOOTSTRAPARCHIVE
 
 # Create bulwark.conf
-cat > $HOME/.bulwark/bulwark.conf << EOL
+sudo tee > $HOME/.bulwark/bulwark.conf << EOL
 ${INSTALLERUSED}
 rpcuser=${RPCUSER}
 rpcpassword=${RPCPASSWORD}

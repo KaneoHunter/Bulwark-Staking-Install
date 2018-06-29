@@ -3,6 +3,10 @@
 BOOTSTRAPURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep bootstrap.dat.xz | grep browser_download_url | cut -d '"' -f 4`
 BOOTSTRAPARCHIVE="bootstrap.dat.xz"
 
+# Make sure curl is installed
+apt -qqy install curl
+clear
+
 clear
 echo "This script will refresh your wallet."
 read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s

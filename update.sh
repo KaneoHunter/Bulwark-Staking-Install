@@ -10,6 +10,10 @@ BOOTSTRAPARCHIVE="bootstrap.dat.xz"
 
 CHARS="/-\|"
 
+# Make sure curl is installed
+apt -qqy install curl
+clear
+
 clear
 echo "This script will update your wallet to version $BWKVERSION"
 read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s
