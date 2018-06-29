@@ -1,10 +1,10 @@
 #!/bin/bash
 
-VPSTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bulwark-1.3.0.0-linux64.tar.gz"
-VPSTARBALLNAME="bulwark-1.3.0.0-linux64.tar.gz"
-SHNTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bulwark-1.3.0.0-ARMx64.tar.gz"
-SHNTARBALLNAME="bulwark-1.3.0.0-ARMx64.tar.gz"
-BWKVERSION="1.3.0.0"
+VPSTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.1/bulwark-1.3.1.0-linux64.tar.gz"
+VPSTARBALLNAME="bulwark-1.3.1.0-linux64.tar.gz"
+SHNTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.1/bulwark-1.3.1.0-ARMx64.tar.gz"
+SHNTARBALLNAME="bulwark-1.3.1.0-ARMx64.tar.gz"
+BWKVERSION="1.3.1.0"
 
 CHARS="/-\|"
 

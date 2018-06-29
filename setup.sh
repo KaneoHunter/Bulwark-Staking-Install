@@ -2,12 +2,12 @@
 
 # Set these to change the version of Bulwark to install
 
-VPSTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bulwark-1.3.0.0-linux64.tar.gz"
-VPSTARBALLNAME="bulwark-1.3.0.0-linux64.tar.gz"
-SHNTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bulwark-1.3.0.0-ARMx64.tar.gz"
-SHNTARBALLNAME="bulwark-1.3.0.0-ARMx64.tar.gz"
-BWKVERSION="1.3.0.0"
-BOOTSTRAPURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bootstrap.dat.xz"
+VPSTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.1/bulwark-1.3.1.0-linux64.tar.gz"
+VPSTARBALLNAME="bulwark-1.3.1.0-linux64.tar.gz"
+SHNTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.1/bulwark-1.3.1.0-ARMx64.tar.gz"
+SHNTARBALLNAME="bulwark-1.3.1.0-ARMx64.tar.gz"
+BWKVERSION="1.3.1.0"
+BOOTSTRAPURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.1/bootstrap.dat.xz"
 BOOTSTRAPARCHIVE="bootstrap.dat.xz"
 
 # Check if we have enough memory
