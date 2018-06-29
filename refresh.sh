@@ -1,6 +1,6 @@
 #!/bin/bash
 
-BOOTSTRAPURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.0/bootstrap.dat.xz"
+BOOTSTRAPURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.1/bootstrap.dat.xz"
 BOOTSTRAPARCHIVE="bootstrap.dat.xz"
 
 clear
