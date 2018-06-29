@@ -2,12 +2,12 @@
 
 # Set these to change the version of Bulwark to install
 
-VPSTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.1/bulwark-1.3.1.0-linux64.tar.gz"
-VPSTARBALLNAME="bulwark-1.3.1.0-linux64.tar.gz"
-SHNTARBALLURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.1/bulwark-1.3.1.0-ARMx64.tar.gz"
-SHNTARBALLNAME="bulwark-1.3.1.0-ARMx64.tar.gz"
-BWKVERSION="1.3.1.0"
-BOOTSTRAPURL="https://github.com/bulwark-crypto/Bulwark/releases/download/1.3.1/bootstrap.dat.xz"
+VPSTARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4`
+VPSTARBALLNAME=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4 | cut -d "/" -f 9`
+TARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARMx64 | cut -d '"' -f 4`
+TARBALLNAME=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARMx64 | cut -d '"' -f 4 | cut -d "/" -f 9`
+BWKVERSION=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARMx64 | cut -d '"' -f 4 | cut -d "/" -f 8`
+BOOTSTRAPURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep bootstrap.dat.xz | grep browser_download_url | cut -d '"' -f 4`
 BOOTSTRAPARCHIVE="bootstrap.dat.xz"
 
 # Check if we have enough memory
