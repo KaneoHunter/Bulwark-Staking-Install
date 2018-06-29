@@ -22,12 +22,17 @@ if [[ `df -k --output=avail / | tail -n1` -lt 10485760 ]]; then
   exit 1
 fi
 
+clear
+echo "This script will install a staking wallet."
+read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s
+clear
+
 # Install tools for dig and systemctl
 echo "Preparing installation..."
-apt-get install git dnsutils systemd -y > /dev/null 2>&1
+sudo apt-get install git dnsutils systemd -y > /dev/null 2>&1
 
 # Check for systemd
-systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
+sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
 
 # Get our current IP
 if [ -z "$EXTERNALIP" ]; then
@@ -36,7 +41,6 @@ fi
 clear
 
 USER=$(whoami)
-USERHOME=/home/$USER
 
 # Generate random passwords
 RPCUSER=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
@@ -44,58 +48,55 @@ RPCPASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 
 # update packages and upgrade Ubuntu
 echo "Installing dependencies..."
-apt-get -qq update
-apt-get -qq upgrade
-apt-get -qq autoremove
-apt-get -qq install wget htop xz-utils
-apt-get -qq install build-essential && apt-get -qq install libtool autotools-dev autoconf automake && apt-get -qq install libssl-dev && apt-get -qq install libboost-all-dev && apt-get -qq install software-properties-common && add-apt-repository -y ppa:bitcoin/bitcoin && apt update && apt-get -qq install libdb4.8-dev && apt-get -qq install libdb4.8++-dev && apt-get -qq install libminiupnpc-dev && apt-get -qq install libqt4-dev libprotobuf-dev protobuf-compiler && apt-get -qq install libqrencode-dev && apt-get -qq install git && apt-get -qq install pkg-config && apt-get -qq install libzmq3-dev
-apt-get -qq install aptitude
+sudo apt-get -qq update
+sudo apt-get -qq upgrade
+sudo apt-get -qq autoremove
+sudo apt-get -qq install wget htop xz-utils build-essential libtool autotools-dev autoconf automake libssl-dev libboost-all-dev software-properties-common
+sudo add-apt-repository -y ppa:bitcoin/bitcoin
+sudo apt update
+sudo apt-get -qq install libdb4.8-dev libdb4.8++-dev libminiupnpc-dev libqt4-dev libprotobuf-dev protobuf-compiler libqrencode-dev git pkg-config libzmq3-dev aptitude
 
 # Install Fail2Ban
-aptitude -y -q install fail2ban
+sudo aptitude -y -q install fail2ban
 # Reduce Fail2Ban memory usage - http://hacksnsnacks.com/snippets/reduce-fail2ban-memory-usage/
 echo "ulimit -s 256" | sudo tee -a /etc/default/fail2ban
-service fail2ban restart
+sudo service fail2ban restart
 
 
 # Install UFW
-apt-get -qq install ufw
-ufw default deny incoming
-ufw default allow outgoing
-ufw allow ssh
-ufw allow 52543/tcp
-yes | ufw enable
+sudo apt-get -qq install ufw
+sudo ufw default deny incoming
+sudo ufw default allow outgoing
+sudo ufw allow ssh
+sudo ufw allow 52543/tcp
+yes | sudo ufw enable
 
 if [ -z $(cat /proc/cpuinfo | grep ARMv7) ]; then
   # Install Bulwark daemon for x86 systems
   wget $VPSTARBALLURL
   tar -xzvf $VPSTARBALLNAME && mv bin bulwark-$BWKVERSION
   rm $VPSTARBALLNAME
-  cp ./bulwark-$BWKVERSION/bulwarkd /usr/local/bin
-  cp ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
-  cp ./bulwark-$BWKVERSION/bulwark-tx /usr/local/bin
-  rm -rf bulwark-$BWKVERSION
 else
   # Install Bulwark daemon for ARMv7 systems
   wget $SHNTARBALLURL
   tar -xzvf $SHNTARBALLNAME && mv bin bulwark-$BWKVERSION
   rm $SHNTARBALLNAME
-  cp ./bulwark-$BWKVERSION/bulwarkd /usr/local/bin
-  cp ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
-  cp ./bulwark-$BWKVERSION/bulwark-tx /usr/local/bin
-  rm -rf bulwark-$BWKVERSION
 fi
 
-  # Create .bulwark directory
-mkdir $USERHOME/.bulwark
+sudo mv ./bulwark-$BWKVERSION/bulwarkd /usr/local/bin
+sudo mv ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
+sudo mv ./bulwark-$BWKVERSION/bulwark-tx /usr/local/bin
+rm -rf bulwark-$BWKVERSION
+
+# Create .bulwark directory
+mkdir $HOME/.bulwark
 
 # Install bootstrap file
 echo "Installing bootstrap file..."
-wget $BOOTSTRAPURL && xz -cd $BOOTSTRAPARCHIVE > $USERHOME/.bulwark/bootstrap.dat && rm $BOOTSTRAPARCHIVE
+wget $BOOTSTRAPURL && xz -cd $BOOTSTRAPARCHIVE > $HOME/.bulwark/bootstrap.dat && rm $BOOTSTRAPARCHIVE
 
 # Create bulwark.conf
-touch $USERHOME/.bulwark/bulwark.conf
-cat > $USERHOME/.bulwark/bulwark.conf << EOL
+cat > $HOME/.bulwark/bulwark.conf << EOL
 ${INSTALLERUSED}
 rpcuser=${RPCUSER}
 rpcpassword=${RPCPASSWORD}
@@ -107,21 +108,21 @@ logtimestamps=1
 maxconnections=256
 staking=1
 EOL
-chmod 0600 $USERHOME/.bulwark/bulwark.conf
-chown -R $USER:$USER $USERHOME/.bulwark
+chmod 0600 $HOME/.bulwark/bulwark.conf
+chown -R $USER:$USER $HOME/.bulwark
 
 sleep 5
 
-cat > /etc/systemd/system/bulwarkd.service << EOL
+sudo tee /etc/systemd/system/bulwarkd.service << EOL
 [Unit]
 Description=Bulwarks's distributed currency daemon
 After=network.target
 [Service]
 Type=forking
 User=${USER}
-WorkingDirectory=${USERHOME}
-ExecStart=/usr/local/bin/bulwarkd -conf=${USERHOME}/.bulwark/bulwark.conf -datadir=${USERHOME}/.bulwark
-ExecStop=/usr/local/bin/bulwark-cli -conf=${USERHOME}/.bulwark/bulwark.conf -datadir=${USERHOME}/.bulwark stop
+WorkingDirectory=${HOME}
+ExecStart=/usr/local/bin/bulwarkd -conf=${HOME}/.bulwark/bulwark.conf -datadir=${HOME}/.bulwark
+ExecStop=/usr/local/bin/bulwark-cli -conf=${HOME}/.bulwark/bulwark.conf -datadir=${HOME}/.bulwark stop
 Restart=on-failure
 RestartSec=1m
 StartLimitIntervalSec=5m
@@ -138,7 +139,7 @@ until [ -n "$(bulwark-cli getconnectioncount 2>/dev/null)"  ]; do
   sleep 1
 done
 
-if ! systemctl status bulwarkd | grep -q "active (running)"; then
+if ! sudo systemctl status bulwarkd | grep -q "active (running)"; then
   echo "ERROR: Failed to start bulwarkd. Please contact support."
   exit
 fi
@@ -155,29 +156,29 @@ echo "Your node has been set up, now setting up staking.."
 sleep 5
 
 #Ensure bulwarkd is active
-  if systemctl is-active --quiet bulwarkd; then
+  if sudo systemctl is-active --quiet bulwarkd; then
   	sudo systemctl start bulwarkd
 fi
 echo "Setting Up Staking Address.."
 
 #Simple check to make sure the bulwarkd sync process is finished, so it isn't interrupted and forced to start over later.'
 echo "Checking Bulwarkd status. The script will begin setting up staking once bulwarkd has finished syncing. Please allow this process to finish."
-until su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" $USER; do
-  echo -ne "Current block: "`su -c "bulwark-cli getinfo" $USER | grep blocks | awk '{print $3}' | cut -d ',' -f 1`'\r'
+until bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null; do
+  echo -ne "Current block: "`bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1`'\r'
   sleep 1
 done
 
 #Ensure the .conf exists
-touch ~/.bulwark/bulwark.conf
+touch $HOME/.bulwark/bulwark.conf
 
 #If the line does not already exist, adds a line to bulwark.conf to instruct the wallet to stake
 
-sed 's/staking=0/staking=1/' <~/.bulwark/bulwark.conf
+sed 's/staking=0/staking=1/' <$HOME/.bulwark/bulwark.conf
 
-if grep -Fxq "staking=1" ~/.bulwark/bulwark.conf; then
+if grep -Fxq "staking=1" $HOME/.bulwark/bulwark.conf; then
   	echo "Staking Already Active"
   else
-  	echo "staking=1" >> ~/.bulwark/bulwark.conf
+  	echo "staking=1" >> $HOME/.bulwark/bulwark.conf
 fi
 
 #Generates new address and assigns it a variable
@@ -207,7 +208,7 @@ bulwark-cli encryptwallet $ENCRYPTIONKEY && echo "Wallet successfully encrypted!
 #Wait for bulwarkd to close down after wallet encryption
 echo "Waiting for bulwarkd to restart..."
 until  ! systemctl is-active --quiet bulwarkd; do
-    sleep 0.5
+    sleep 1
 done
 
 #Open up bulwarkd again
@@ -217,13 +218,9 @@ sudo systemctl start bulwarkd
 bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true
 
 #Make decrypt script
-cd ~/.bulwark
-sudo wget https://raw.githubusercontent.com/KaneoHunter/shn/master/decrypt.sh
-cp ~/.bulwark/decrypt.sh /usr/bin/local/bin/decrypt.sh
-chown $USER:$USER /usr/local/bin/decrypt.sh
-chmod 700 /usr/local/bin/decrypt.sh
-rm -Rf ~/.bulwark/decrypt.sh
-
+sudo curl https://raw.githubusercontent.com/KaneoHunter/shn/master/decrypt.sh > /usr/local/bin/decrypt.sh
+sudochown $USER:$USER /usr/local/bin/decrypt.sh
+sudo chmod 700 /usr/local/bin/decrypt.sh
 
 #Output more
 cat << EOL
@@ -268,7 +265,7 @@ echo "Thank you for installing your Bulwark staking wallet, now finishing instal
 
 unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 
-cat /dev/null > ~/.bash_history && history -c
+sudo cat /dev/null > $HOME/.bash_history && history -c
 
 clear
 
