@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#turn off history logging
+set +o history
+
 # Set these to change the version of Bulwark to install
 
 VPSTARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4`
@@ -270,7 +273,7 @@ echo "Thank you for installing your Bulwark staking wallet, now finishing instal
 unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 
 sudo cat /dev/null > $HOME/.bash_history && history -c
-
+set -o history
 clear
 
 echo "Staking wallet operational."
