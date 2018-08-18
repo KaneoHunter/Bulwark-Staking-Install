@@ -229,6 +229,64 @@ sudo curl https://raw.githubusercontent.com/KaneoHunter/shn/master/decrypt.sh > 
 sudochown $USER:$USER /usr/local/bin/decrypt.sh
 sudo chmod 700 /usr/local/bin/decrypt.sh
 
+#create decrypt.sh and service
+
+#Check if it already exists, remove if so.
+if [  -e /$home/.bulwark/decrypt.sh ]; then
+  rm -Rf /$home/.bulwark/decrypt.sh
+fi
+
+#create decrypt.sh
+sudo tee > /$home/.bulwark/decrypt.sh << EOL
+#!/bin/bash
+
+#stop writing to history.
+set +o history
+
+#check bulwarkd is active. activate if not.
+if [ -z "$(ps cax | grep bulwarkd)" ]; then
+  systemctl start bulwarkd
+fi
+
+#ask for password.
+read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type, this is normal) : " ENCRYPTIONKEY
+
+#confirm wallet is synced. wait if not.
+until bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null; do
+  echo -ne "Current block: "`bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1`'\r'
+  sleep 1
+done
+
+#unlock wallet. confirm it's unlocked.
+until [ -n $(bulwark-cli getstakingstatus | grep walletunlocked | grep false) ]; do
+
+  #ask for password and attempt it
+  read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type, this is normal) : " ENCRYPTIONKEY
+  bulwark-cli walletpassphrase $ENCRYPTIONKEY 99999999 true
+done
+
+#tell user all was successful.
+clear
+echo "Wallet successfully unlocked!"
+echo " "
+bulwark-cli getstakingstatus
+
+#restart history.
+set -o history
+EOL
+
+#create decrypt service
+sudo tee /etc/systemd/system/decryptwallet.service << EOL
+[Unit]
+Description=Runs a decryption script for your Bulwark wallet
+[Service]
+Type=oneshot
+User=${USER}
+ExecStart=/${home}/.bulwark/decrypt.sh
+[Install]
+WantedBy=multi-user.target
+EOL
+
 #Output more
 cat << EOL
 Your wallet has now been set up for staking, please send the coins you wish to
@@ -246,7 +304,7 @@ lines to assist with recovery if ever needed.
 ${BIP38}
 
 If your bulwarkd restarts, and you need to unlock your wallet again, use
-the included script by running "decrypt.sh" to unlock your
+the included script by running "systemctl start decryptwallet" to unlock your
 wallet securely.
 
 After the installation script ends, we will wipe all history and have no
