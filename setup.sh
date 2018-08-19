@@ -330,7 +330,6 @@ echo "Thank you for installing your Bulwark staking wallet, now finishing instal
 
 unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 
-sudo cat /dev/null > $HOME/.bash_history && history -c
 set -o history
 clear
 
