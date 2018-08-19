@@ -7,8 +7,8 @@ set +o history
 
 VPSTARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4`
 VPSTARBALLNAME=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4 | cut -d "/" -f 9`
-TARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARMx64 | cut -d '"' -f 4`
-TARBALLNAME=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARMx64 | cut -d '"' -f 4 | cut -d "/" -f 9`
+SHNTARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARMx64 | cut -d '"' -f 4`
+SHNTARBALLNAME=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARMx64 | cut -d '"' -f 4 | cut -d "/" -f 9`
 BWKVERSION=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARMx64 | cut -d '"' -f 4 | cut -d "/" -f 8`
 BOOTSTRAPURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep bootstrap.dat.xz | grep browser_download_url | cut -d '"' -f 4`
 BOOTSTRAPARCHIVE="bootstrap.dat.xz"
@@ -207,7 +207,7 @@ done
 
 #Encrypt the new address with the requested password
 BIP38=$(bulwark-cli bip38encrypt $STAKINGADDRESS $ENCRYPTIONKEY)
-echo "Address successfully encrypted!"
+echo "Address successfully encrypted! Please wait for encryption to finish..."
 
 #Encrypt the wallet with the same password
 bulwark-cli encryptwallet $ENCRYPTIONKEY && echo "Wallet successfully encrypted!" || { echo "Encryption failed!"; exit; }
@@ -318,13 +318,10 @@ social media channels.
 
 EOL
 
-read -e -p "Please confirm you have written down your password and encrypted key somewhere
-safe by typing \"I have read the above and agree\" : " CONFIRMATION
-
 until [  "$CONFIRMATION" = "I have read the above and agree"  ]; do
-  if [  "$CONFIRMATION" != "I have read the above and agree"  ]; then
     read -e -p "Please confirm you have written down your password and encrypted key somewhere
     safe by typing \"I have read the above and agree\" : " CONFIRMATION
+done
 
 echo "Thank you for installing your Bulwark staking wallet, now finishing installation.."
 
