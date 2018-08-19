@@ -207,7 +207,7 @@ done
 
 #Encrypt the new address with the requested password
 BIP38=$(bulwark-cli bip38encrypt $STAKINGADDRESS $ENCRYPTIONKEY)
-echo "Address successfully encrypted!"
+echo "Address successfully encrypted! Please wait for encryption to finish..."
 
 #Encrypt the wallet with the same password
 bulwark-cli encryptwallet $ENCRYPTIONKEY && echo "Wallet successfully encrypted!" || { echo "Encryption failed!"; exit; }
@@ -318,13 +318,10 @@ social media channels.
 
 EOL
 
-read -e -p "Please confirm you have written down your password and encrypted key somewhere
-safe by typing \"I have read the above and agree\" : " CONFIRMATION
-
 until [  "$CONFIRMATION" = "I have read the above and agree"  ]; do
-  if [  "$CONFIRMATION" != "I have read the above and agree"  ]; then
     read -e -p "Please confirm you have written down your password and encrypted key somewhere
     safe by typing \"I have read the above and agree\" : " CONFIRMATION
+done
 
 echo "Thank you for installing your Bulwark staking wallet, now finishing installation.."
 
