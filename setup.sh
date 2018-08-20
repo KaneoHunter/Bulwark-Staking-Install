@@ -97,6 +97,8 @@ mkdir "$USERHOME/.bulwark"
 echo "Installing bootstrap file..."
 wget "$BOOTSTRAPURL" && xz -cd "$BOOTSTRAPARCHIVE" > "$USERHOME/.bulwark/bootstrap.dat" && rm "$BOOTSTRAPARCHIVE"
 
+echo "Creating configuration files..."
+
 # Create bulwark.conf
 cat | sudo tee -a "$USERHOME/.bulwark/bulwark.conf" << EOL
 rpcuser=${RPCUSER}
@@ -111,8 +113,6 @@ staking=1
 EOL
 sudo chmod 0600 "$USERHOME/.bulwark/bulwark.conf"
 sudo chown -R $USER:$USER "$USERHOME/.bulwark"
-
-sleep 5
 
 sudo tee -a /etc/systemd/system/bulwarkd.service << EOL
 [Unit]
