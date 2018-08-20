@@ -26,27 +26,22 @@ if [[ `df -k --output=avail / | tail -n1` -lt 10485760 ]]; then
 fi
 
 clear
-echo "This script will install a staking wallet."
+echo "This script will install a Bulwark staking wallet."
 read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s
 clear
 
-# Install tools for dig and systemctl
+# Install basic tools
 echo "Preparing installation..."
-sudo apt-get install git dnsutils systemd -y > /dev/null 2>&1
-
-# Make sure curl is installed
-apt -qqy install curl
-clear
+sudo apt-get install git curl dnsutils systemd -y > /dev/null 2>&1
 
 # Check for systemd
 sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
 
 # Get our current IP
-if [ -z "$EXTERNALIP" ]; then
-EXTERNALIP=`dig +short myip.opendns.com @resolver1.opendns.com`
-fi
+if [ -z "$EXTERNALIP" ]; then EXTERNALIP=`dig +short myip.opendns.com @resolver1.opendns.com`; fi
 clear
 
+# Set the user
 USER=$(whoami)
 
 # Generate random passwords
@@ -120,7 +115,7 @@ chown -R $USER:$USER $HOME/.bulwark
 
 sleep 5
 
-sudo tee /etc/systemd/system/bulwarkd.service << EOL
+sudo tee > /etc/systemd/system/bulwarkd.service << EOL
 [Unit]
 Description=Bulwarks's distributed currency daemon
 After=network.target
@@ -158,27 +153,27 @@ done
 
 clear
 
-echo "Your node has been set up, now setting up staking.."
+echo "Your node has been set up, now setting up staking..."
 
 sleep 5
 
-#Ensure bulwarkd is active
+# Ensure bulwarkd is active
   if sudo systemctl is-active --quiet bulwarkd; then
   	sudo systemctl start bulwarkd
 fi
 echo "Setting Up Staking Address.."
 
-#Simple check to make sure the bulwarkd sync process is finished, so it isn't interrupted and forced to start over later.'
-echo "Checking Bulwarkd status. The script will begin setting up staking once bulwarkd has finished syncing. Please allow this process to finish."
+# Check to make sure the bulwarkd sync process is finished, so it isn't interrupted and forced to start over later.'
+echo "The script will begin set up staking once bulwarkd has finished syncing. Please allow this process to finish."
 until bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null; do
   echo -ne "Current block: "`bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1`'\r'
   sleep 1
 done
 
-#Ensure the .conf exists
+# Ensure the .conf exists
 touch $HOME/.bulwark/bulwark.conf
 
-#If the line does not already exist, adds a line to bulwark.conf to instruct the wallet to stake
+# If the line does not already exist, adds a line to bulwark.conf to instruct the wallet to stake
 
 sed 's/staking=0/staking=1/' <$HOME/.bulwark/bulwark.conf
 
@@ -188,53 +183,45 @@ if grep -Fxq "staking=1" $HOME/.bulwark/bulwark.conf; then
   	echo "staking=1" >> $HOME/.bulwark/bulwark.conf
 fi
 
-#Generates new address and assigns it a variable
+# Generate new address and assign it a variable
 STAKINGADDRESS=$(bulwark-cli getnewaddress)
 
-#Ask for a password and apply it to a variable and confirm it.
+# Ask for a password and apply it to a variable and confirm it.
 ENCRYPTIONKEY=1
 ENCRYPTIONKEYCONF=2
+echo "Please enter a password to encrypt your new staking address/wallet with, you will not see what you type appear."
+echo -e 'KEEP THIS SAFE, THIS CANNOT BE RECOVERED!\n'
 until [ $ENCRYPTIONKEY = $ENCRYPTIONKEYCONF ]; do
-	read -e -s -p "Please enter a password to encrypt your new staking address/wallet with, you will not see what you type appear. (KEEP THIS SAFE, THIS CANNOT BE RECOVERED) : " ENCRYPTIONKEY
-	read -e -s -p "Please confirm your password : " ENCRYPTIONKEYCONF
-		if [ $ENCRYPTIONKEY != $ENCRYPTIONKEYCONF ]; then
-			echo "Your passwords do not match, please try again."
-		else
-			echo "Password set."
-		fi
+	read -e -s -p "Please enter your password   : " ENCRYPTIONKEY && echo -e '\n'
+	read -e -s -p "Please confirm your password : " ENCRYPTIONKEYCONF && echo -e '\n'
+	if [ $ENCRYPTIONKEY != $ENCRYPTIONKEYCONF ]; then
+		echo "Your passwords do not match, please try again."
+	else
+		echo "Password set."
+	fi
 done
 
-
-#Encrypt the new address with the requested password
+# Encrypt the new address with the requested password
 BIP38=$(bulwark-cli bip38encrypt $STAKINGADDRESS $ENCRYPTIONKEY)
 echo "Address successfully encrypted! Please wait for encryption to finish..."
 
-#Encrypt the wallet with the same password
+# Encrypt the wallet with the same password
 bulwark-cli encryptwallet $ENCRYPTIONKEY && echo "Wallet successfully encrypted!" || { echo "Encryption failed!"; exit; }
 
-#Wait for bulwarkd to close down after wallet encryption
+# Wait for bulwarkd to close down after wallet encryption
 echo "Waiting for bulwarkd to restart..."
-until  ! systemctl is-active --quiet bulwarkd; do
-    sleep 1
-done
+until  ! systemctl is-active --quiet bulwarkd; do sleep 1; done
 
-#Open up bulwarkd again
+# Open up bulwarkd again
 sudo systemctl start bulwarkd
 
-#Unlocks the wallet for a long time period
+# Unlock the wallet for a long time period
 bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true
 
-#Make decrypt script
-sudo curl https://raw.githubusercontent.com/KaneoHunter/shn/master/decrypt.sh > /usr/local/bin/decrypt.sh
-sudochown $USER:$USER /usr/local/bin/decrypt.sh
-sudo chmod 700 /usr/local/bin/decrypt.sh
-
-#create decrypt.sh and service
+# Create decrypt.sh and service
 
 #Check if it already exists, remove if so.
-if [  -e /$home/.bulwark/decrypt.sh ]; then
-  rm -Rf /$home/.bulwark/decrypt.sh
-fi
+if [  -e /$home/.bulwark/decrypt.sh ]; then rm -f /$home/.bulwark/decrypt.sh; fi
 
 #create decrypt.sh
 sudo tee > /$home/.bulwark/decrypt.sh << EOL
@@ -249,7 +236,7 @@ if [ -z "$(ps cax | grep bulwarkd)" ]; then
 fi
 
 #ask for password.
-read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type, this is normal) : " ENCRYPTIONKEY
+read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type, this is normal) : " ENCRYPTIONKEY && echo -e 'n'
 
 #confirm wallet is synced. wait if not.
 until bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null; do
@@ -275,8 +262,8 @@ bulwark-cli getstakingstatus
 set -o history
 EOL
 
-#create decrypt service
-sudo tee /etc/systemd/system/decryptwallet.service << EOL
+# Create decrypt service
+sudo tee /etc/systemd/system/bulwark-decrypt.service << EOL
 [Unit]
 Description=Runs a decryption script for your Bulwark wallet
 [Service]
@@ -287,7 +274,9 @@ ExecStart=/${home}/.bulwark/decrypt.sh
 WantedBy=multi-user.target
 EOL
 
-#Output more
+# Reload systemd daemons
+sudo systemctl daemon-reload
+
 cat << EOL
 Your wallet has now been set up for staking, please send the coins you wish to
 stake to ${STAKINGADDRESS}. Once your wallet is synced your coins should begin
@@ -323,7 +312,7 @@ until [  "$CONFIRMATION" = "I have read the above and agree"  ]; do
     safe by typing \"I have read the above and agree\" : " CONFIRMATION
 done
 
-echo "Thank you for installing your Bulwark staking wallet, now finishing installation.."
+echo "Thank you for installing your Bulwark staking wallet, now finishing installation..."
 
 unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 
