@@ -110,7 +110,7 @@ maxconnections=256
 staking=1
 EOL
 sudo chmod 0600 "$USERHOME/.bulwark/bulwark.conf"
-sudo chown -R "$USER:$USER $USERHOME/.bulwark"
+sudo chown -R $USER:$USER "$USERHOME/.bulwark"
 
 sleep 5
 
