@@ -221,10 +221,10 @@ bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true
 # Create decrypt.sh and service
 
 #Check if it already exists, remove if so.
-if [  -e /$home/.bulwark/decrypt.sh ]; then rm -f /$home/.bulwark/decrypt.sh; fi
+if [  -e $HOME/.bulwark/decrypt.sh ]; then rm -f /$HOME/.bulwark/decrypt.sh; fi
 
 #create decrypt.sh
-sudo tee > /$home/.bulwark/decrypt.sh << EOL
+sudo tee > $HOME/.bulwark/decrypt.sh << EOL
 #!/bin/bash
 
 #stop writing to history.
