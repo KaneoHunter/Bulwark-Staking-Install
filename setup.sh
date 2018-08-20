@@ -221,22 +221,22 @@ bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true
 # Create decrypt.sh and service
 
 #Check if it already exists, remove if so.
-if [  -e $HOME/.bulwark/decrypt.sh ]; then rm -f /$HOME/.bulwark/decrypt.sh; fi
+if [  -e /usr/local/bin/bulwark-decrypt ]; then sudo rm /usr/local/bin/bulwark-decrypt; fi
 
 #create decrypt.sh
-sudo tee > $HOME/.bulwark/decrypt.sh << EOL
+sudo tee > /usr/local/bin/bulwark-decrypt << EOL
 #!/bin/bash
 
 #stop writing to history.
 set +o history
 
 #check bulwarkd is active. activate if not.
-if [ -z "$(ps cax | grep bulwarkd)" ]; then
+if ! systemctl is-active --quiet bulwarkd; then
   systemctl start bulwarkd
 fi
 
 #ask for password.
-read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type, this is normal) : " ENCRYPTIONKEY && echo -e 'n'
+read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type) : " ENCRYPTIONKEY && echo -e 'n'
 
 #confirm wallet is synced. wait if not.
 until bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null; do
@@ -248,7 +248,7 @@ done
 until [ -n $(bulwark-cli getstakingstatus | grep walletunlocked | grep false) ]; do
 
   #ask for password and attempt it
-  read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type, this is normal) : " ENCRYPTIONKEY
+  read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type) : " ENCRYPTIONKEY
   bulwark-cli walletpassphrase $ENCRYPTIONKEY 99999999 true
 done
 
@@ -262,20 +262,7 @@ bulwark-cli getstakingstatus
 set -o history
 EOL
 
-# Create decrypt service
-sudo tee /etc/systemd/system/bulwark-decrypt.service << EOL
-[Unit]
-Description=Runs a decryption script for your Bulwark wallet
-[Service]
-Type=oneshot
-User=${USER}
-ExecStart=/${home}/.bulwark/decrypt.sh
-[Install]
-WantedBy=multi-user.target
-EOL
-
-# Reload systemd daemons
-sudo systemctl daemon-reload
+sudo chmod o+x /usr/local/bin/bulwark-decrypt
 
 cat << EOL
 Your wallet has now been set up for staking, please send the coins you wish to
