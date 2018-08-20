@@ -1,20 +1,17 @@
 #!/bin/bash
 
-VPSTARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4`
-VPSTARBALLNAME=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4 | cut -d "/" -f 9`
-SHNTARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4`
-SHNTARBALLNAME=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4 | cut -d "/" -f 9`
-BWKVERSION=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4 | cut -d "/" -f 8`
+VPSTARBALLURL=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4)
+VPSTARBALLNAME=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4 | cut -d "/" -f 9)
+SHNTARBALLURL=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4)
+SHNTARBALLNAME=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4 | cut -d "/" -f 9)
+BWKVERSION=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4 | cut -d "/" -f 8)
 
-CHARS="/-\|"
+CHARS="/-\\|"
 
-# Make sure curl is installed
-apt -qqy install curl
-clear
 
 clear
 echo "This script will update your wallet to version $BWKVERSION"
-read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s
+read -rp "Press Ctrl-C to abort or any other key to continue. " -n1 -s
 clear
 
 if [ "$(id -u)" != "0" ]; then
@@ -22,34 +19,34 @@ if [ "$(id -u)" != "0" ]; then
   exit 1
 fi
 
-USER=`ps u $(pgrep bulwarkd) | grep bulwarkd | cut -d " " -f 1`
-USERHOME=`eval echo "~$USER"`
+USER="$("ps u $(pgrep bulwarkd)" | grep bulwarkd | cut -d " " -f 1)"
+USERHOME="$(eval echo "~$USER")"
 
 echo "Shutting down wallet..."
 if [ -e /etc/systemd/system/bulwarkd.service ]; then
   systemctl stop bulwarkd
 else
-  su -c "bulwark-cli stop" $USER
+  su -c "bulwark-cli stop" "$USER"
 fi
 
-if [ -z $(cat /proc/cpuinfo | grep ARMv7) ]; then
-  # Install Bulwark daemon for x86 systems
-  wget $VPSTARBALLURL
-  tar -xzvf $VPSTARBALLNAME && mv bin bulwark-$BWKVERSION
-  rm $VPSTARBALLNAME
-  cp ./bulwark-$BWKVERSION/bulwarkd /usr/local/bin
-  cp ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
-  cp ./bulwark-$BWKVERSION/bulwark-tx /usr/local/bin
-  rm -rf bulwark-$BWKVERSION
-else
+if grep -q "ARMv7" /proc/cpuinfo; then
   # Install Bulwark daemon for ARMv7 systems
-  wget $SHNTARBALLURL
-  tar -xzvf $SHNTARBALLNAME && mv bin bulwark-$BWKVERSION
-  rm $SHNTARBALLNAME
-  cp ./bulwark-$BWKVERSION/bulwarkd /usr/local/bin
-  cp ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
-  cp ./bulwark-$BWKVERSION/bulwark-tx /usr/local/bin
-  rm -rf bulwark-$BWKVERSION
+  wget "$SHNTARBALLURL"
+  tar -xzvf "$SHNTARBALLNAME" && mv bin "bulwark-$BWKVERSION"
+  rm" $SHNTARBALLNAME"
+  cp "./bulwark-$BWKVERSION/bulwarkd" /usr/local/bin
+  cp "./bulwark-$BWKVERSION/bulwark-cli" /usr/local/bin
+  cp "./bulwark-$BWKVERSION/bulwark-tx" /usr/local/bin
+  rm -rf "bulwark-$BWKVERSION"
+else
+  # Install Bulwark daemon for x86 systems
+  wget "$VPSTARBALLURL"
+  tar -xzvf "$VPSTARBALLNAME" && mv bin "bulwark-$BWKVERSION"
+  rm "$VPSTARBALLNAME"
+  cp "./bulwark-$BWKVERSION/bulwarkd" /usr/local/bin
+  cp "./bulwark-$BWKVERSION/bulwark-cli" /usr/local/bin
+  cp "./bulwark-$BWKVERSION/bulwark-tx" /usr/local/bin
+  rm -rf "bulwark-$BWKVERSION"
 fi
 
 if [ -e /usr/bin/bulwarkd ];then rm -rf /usr/bin/bulwarkd; fi
@@ -57,7 +54,7 @@ if [ -e /usr/bin/bulwark-cli ];then rm -rf /usr/bin/bulwark-cli; fi
 if [ -e /usr/bin/bulwark-tx ];then rm -rf /usr/bin/bulwark-tx; fi
 
 # Remove addnodes from bulwark.conf
-sed -i '/^addnode/d' $USERHOME/.bulwark/bulwark.conf
+sed -i '/^addnode/d' "$USERHOME/.bulwark/bulwark.conf"
 
 # Add Fail2Ban memory hack if needed
 if ! grep -q "ulimit -s 256" /etc/default/fail2ban; then
@@ -100,10 +97,10 @@ clear
 
 echo "Your wallet is syncing. Please wait for this process to finish."
 
-until su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" $USER; do
+until su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" "$USER"; do
   for (( i=0; i<${#CHARS}; i++ )); do
     sleep 2
-    echo -en "${CHARS:$i:1}" "\r"
+    echo -en "${CHARS:$i:1}" "\\r"
   done
 done
 

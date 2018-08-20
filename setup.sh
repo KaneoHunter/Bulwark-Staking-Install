@@ -1,33 +1,33 @@
 #!/bin/bash
 
 #turn off history logging
-set +o history
+sudo set +o history
 
 # Set these to change the version of Bulwark to install
 
-VPSTARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4`
-VPSTARBALLNAME=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4 | cut -d "/" -f 9`
-SHNTARBALLURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4`
-SHNTARBALLNAME=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4 | cut -d "/" -f 9`
-BWKVERSION=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4 | cut -d "/" -f 8`
-BOOTSTRAPURL=`curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep bootstrap.dat.xz | grep browser_download_url | cut -d '"' -f 4`
+VPSTARBALLURL=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4)
+VPSTARBALLNAME=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4 | cut -d "/" -f 9)
+SHNTARBALLURL=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4)
+SHNTARBALLNAME=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4 | cut -d "/" -f 9)
+BWKVERSION=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep ARM | cut -d '"' -f 4 | cut -d "/" -f 8)
+BOOTSTRAPURL=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep bootstrap.dat.xz | grep browser_download_url | cut -d '"' -f 4)
 BOOTSTRAPARCHIVE="bootstrap.dat.xz"
 
 # Check if we have enough memory
-if [[ `free -m | awk '/^Mem:/{print $2}'` -lt 850 ]]; then
+if [[ $(free -m | awk '/^Mem:/{print $2}') -lt 850 ]]; then
   echo "This installation requires at least 1GB of RAM.";
   exit 1
 fi
 
 # Check if we have enough disk space
-if [[ `df -k --output=avail / | tail -n1` -lt 10485760 ]]; then
+if [[ $(df -k --output=avail / | tail -n1) -lt 10485760 ]]; then
   echo "This installation requires at least 10GB of free disk space.";
   exit 1
 fi
 
 clear
 echo "This script will install a Bulwark staking wallet."
-read -p "Press Ctrl-C to abort or any other key to continue. " -n1 -s
+read -rp "Press Ctrl-C to abort or any other key to continue. " -n1 -s
 clear
 
 # Install basic tools
@@ -37,16 +37,16 @@ sudo apt-get install git curl dnsutils systemd -y > /dev/null 2>&1
 # Check for systemd
 sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
 
-# Get our current IP
-if [ -z "$EXTERNALIP" ]; then EXTERNALIP=`dig +short myip.opendns.com @resolver1.opendns.com`; fi
-clear
+# Create a bulwark user
+adduser bulwark --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password > /dev/null
 
 # Set the user
-USER=$(whoami)
+USER=bulwark
+USERHOME=$(eval echo "~bulwark")
 
 # Generate random passwords
-RPCUSER=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
-RPCPASSWORD=$(cat /dev/urandom | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
+RPCUSER=$(dd if=/dev/urandom bs=3 count=512 status=none | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
+RPCPASSWORD=$(dd if=/dev/urandom bs=3 count=512 status=none | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 
 # update packages and upgrade Ubuntu
 echo "Installing dependencies..."
@@ -73,32 +73,32 @@ sudo ufw allow ssh
 sudo ufw allow 52543/tcp
 yes | sudo ufw enable
 
-if [ -z $(cat /proc/cpuinfo | grep ARMv7) ]; then
-  # Install Bulwark daemon for x86 systems
-  wget $VPSTARBALLURL
-  tar -xzvf $VPSTARBALLNAME && mv bin bulwark-$BWKVERSION
-  rm $VPSTARBALLNAME
-else
+if grep -q "ARMv7" /proc/cpuinfo; then
   # Install Bulwark daemon for ARMv7 systems
-  wget $SHNTARBALLURL
-  tar -xzvf $SHNTARBALLNAME && mv bin bulwark-$BWKVERSION
-  rm $SHNTARBALLNAME
+  wget "$SHNTARBALLURL"
+  tar -xzvf "$SHNTARBALLNAME" && mv bin "bulwark-$BWKVERSION"
+  rm "$SHNTARBALLNAME"
+else
+  # Install Bulwark daemon for x86 systems
+  wget "$VPSTARBALLURL"
+  tar -xzvf "$VPSTARBALLNAME" && mv bin "bulwark-$BWKVERSION"
+  rm "$VPSTARBALLNAME"
 fi
 
-sudo mv ./bulwark-$BWKVERSION/bulwarkd /usr/local/bin
-sudo mv ./bulwark-$BWKVERSION/bulwark-cli /usr/local/bin
-sudo mv ./bulwark-$BWKVERSION/bulwark-tx /usr/local/bin
-rm -rf bulwark-$BWKVERSION
+sudo mv "./bulwark-$BWKVERSION/bulwarkd" /usr/local/bin
+sudo mv "./bulwark-$BWKVERSION/bulwark-cli" /usr/local/bin
+sudo mv "./bulwark-$BWKVERSION/bulwark-tx" /usr/local/bin
+rm -rf "bulwark-$BWKVERSION"
 
 # Create .bulwark directory
-mkdir $HOME/.bulwark
+mkdir "$USERHOME/.bulwark"
 
 # Install bootstrap file
 echo "Installing bootstrap file..."
-wget $BOOTSTRAPURL && xz -cd $BOOTSTRAPARCHIVE > $HOME/.bulwark/bootstrap.dat && rm $BOOTSTRAPARCHIVE
+wget "$BOOTSTRAPURL" && xz -cd "$BOOTSTRAPARCHIVE" > "$USERHOME/.bulwark/bootstrap.dat" && rm "$BOOTSTRAPARCHIVE"
 
 # Create bulwark.conf
-sudo tee > $HOME/.bulwark/bulwark.conf << EOL
+cat | sudo tee -a "$USERHOME/.bulwark/bulwark.conf" << EOL
 ${INSTALLERUSED}
 rpcuser=${RPCUSER}
 rpcpassword=${RPCPASSWORD}
@@ -110,12 +110,12 @@ logtimestamps=1
 maxconnections=256
 staking=1
 EOL
-chmod 0600 $HOME/.bulwark/bulwark.conf
-chown -R $USER:$USER $HOME/.bulwark
+sudo chmod 0600 "$USERHOME/.bulwark/bulwark.conf"
+sudo chown -R "$USER:$USER $USERHOME/.bulwark"
 
 sleep 5
 
-sudo tee > /etc/systemd/system/bulwarkd.service << EOL
+sudo tee -a /etc/systemd/system/bulwarkd.service << EOL
 [Unit]
 Description=Bulwarks's distributed currency daemon
 After=network.target
@@ -137,7 +137,7 @@ sudo systemctl enable bulwarkd
 echo "Starting bulwarkd..."
 sudo systemctl start bulwarkd
 
-until [ -n "$(bulwark-cli getconnectioncount 2>/dev/null)"  ]; do
+until sudo su -c "$(bulwark-cli getconnectioncount 2>/dev/null)" $USER; do
   sleep 1
 done
 
@@ -147,7 +147,7 @@ if ! sudo systemctl status bulwarkd | grep -q "active (running)"; then
 fi
 
 echo "Waiting for wallet to load..."
-until bulwark-cli getinfo 2>/dev/null | grep -q "version"; do
+until sudo su -c "bulwark-cli getinfo 2>/dev/null | grep -q 'version'" $USER; do
   sleep 1;
 done
 
@@ -165,22 +165,22 @@ echo "Setting Up Staking Address.."
 
 # Check to make sure the bulwarkd sync process is finished, so it isn't interrupted and forced to start over later.'
 echo "The script will begin set up staking once bulwarkd has finished syncing. Please allow this process to finish."
-until bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null; do
-  echo -ne "Current block: "`bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1`'\r'
+until sudo su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" $USER; do
+  echo -ne "Current block: ""$(sudo su -c "bulwark-cli getinfo" $USER | grep blocks | awk '{print $3}' | cut -d ',' -f 1)"'\r'
   sleep 1
 done
 
 # Ensure the .conf exists
-touch $HOME/.bulwark/bulwark.conf
+sudo touch "$USERHOME/.bulwark/bulwark.conf"
 
 # If the line does not already exist, adds a line to bulwark.conf to instruct the wallet to stake
 
-sed 's/staking=0/staking=1/' <$HOME/.bulwark/bulwark.conf
+sudo sed -i 's/staking=0/staking=1/' "$USERHOME/.bulwark/bulwark.conf"
 
-if grep -Fxq "staking=1" $HOME/.bulwark/bulwark.conf; then
+if grep -Fxq "staking=1" "$USERHOME/.bulwark/bulwark.conf"; then
   	echo "Staking Already Active"
   else
-  	echo "staking=1" >> $HOME/.bulwark/bulwark.conf
+  	echo "staking=1" | sudo tee -a "$USERHOME/.bulwark/bulwark.conf"
 fi
 
 # Generate new address and assign it a variable
@@ -191,10 +191,10 @@ ENCRYPTIONKEY=1
 ENCRYPTIONKEYCONF=2
 echo "Please enter a password to encrypt your new staking address/wallet with, you will not see what you type appear."
 echo -e 'KEEP THIS SAFE, THIS CANNOT BE RECOVERED!\n'
-until [ $ENCRYPTIONKEY = $ENCRYPTIONKEYCONF ]; do
-	read -e -s -p "Please enter your password   : " ENCRYPTIONKEY && echo -e '\n'
-	read -e -s -p "Please confirm your password : " ENCRYPTIONKEYCONF && echo -e '\n'
-	if [ $ENCRYPTIONKEY != $ENCRYPTIONKEYCONF ]; then
+until [ "$ENCRYPTIONKEY" = "$ENCRYPTIONKEYCONF" ]; do
+	read -ersp "Please enter your password   : " ENCRYPTIONKEY && echo -e '\n'
+	read -ersp "Please confirm your password : " ENCRYPTIONKEYCONF && echo -e '\n'
+	if [ "$ENCRYPTIONKEY" != "$ENCRYPTIONKEYCONF" ]; then
 		echo "Your passwords do not match, please try again."
 	else
 		echo "Password set."
@@ -202,21 +202,21 @@ until [ $ENCRYPTIONKEY = $ENCRYPTIONKEYCONF ]; do
 done
 
 # Encrypt the new address with the requested password
-BIP38=$(bulwark-cli bip38encrypt $STAKINGADDRESS $ENCRYPTIONKEY)
+BIP38=$(sudo su -c "bulwark-cli bip38encrypt $STAKINGADDRESS $ENCRYPTIONKEY" $USER)
 echo "Address successfully encrypted! Please wait for encryption to finish..."
 
 # Encrypt the wallet with the same password
-bulwark-cli encryptwallet $ENCRYPTIONKEY && echo "Wallet successfully encrypted!" || { echo "Encryption failed!"; exit; }
+sudo su -c "bulwark-cli encryptwallet $ENCRYPTIONKEY" $USER && echo "Wallet successfully encrypted!"
 
 # Wait for bulwarkd to close down after wallet encryption
 echo "Waiting for bulwarkd to restart..."
-until  ! systemctl is-active --quiet bulwarkd; do sleep 1; done
+until  ! sudo systemctl is-active --quiet bulwarkd; do sleep 1; done
 
 # Open up bulwarkd again
 sudo systemctl start bulwarkd
 
 # Unlock the wallet for a long time period
-bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true
+sudo su -c "bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true" $USER
 
 # Create decrypt.sh and service
 
@@ -224,41 +224,37 @@ bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true
 if [  -e /usr/local/bin/bulwark-decrypt ]; then sudo rm /usr/local/bin/bulwark-decrypt; fi
 
 #create decrypt.sh
-sudo tee > /usr/local/bin/bulwark-decrypt << EOL
+sudo tee /usr/local/bin/bulwark-decrypt << EOL
 #!/bin/bash
 
 # Stop writing to history
 set +o history
 
-# Ensure bulwarkd is active
-if ! systemctl is-active --quiet bulwarkd; then
-  systemctl start bulwarkd
-fi
-
 # Confirm wallet is synced
-until bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null; do
-  echo -ne "Current block: "238816'\r'
+until sudo su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" $USER; do
+  echo -ne "Current block: "$(bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1)'\\r'
   sleep 1
 done
 
 # Unlock wallet
-until bulwark-cli getstakingstatus | grep walletunlocked | grep true; do
+until sudo su -c "bulwark-cli getstakingstatus | grep walletunlocked | grep true" $USER; do
 
   #ask for password and attempt it
-  read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type) : " ENCRYPTIONKEY && echo "\n"
-  bulwark-cli walletpassphrase \$ENCRYPTIONKEY 99999999 true
+  read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type) : " ENCRYPTIONKEY && echo "\\n"
+  sudo su -c "bulwark-cli walletpassphrase \$ENCRYPTIONKEY 99999999 true" $USER
 done
 
 # Tell user all was successful
 echo "Wallet successfully unlocked!"
 echo " "
-bulwark-cli getstakingstatus
+sudo su -c "bulwark-cli getstakingstatus" $USER
 
 # Restart history
 set -o history
 EOL
 
-sudo chmod o+x /usr/local/bin/bulwark-decrypt
+sudo chmod a+x /usr/local/bin/bulwark-decrypt
+sudo chown -R $USER:$USER "$USERHOME/.bulwark/"
 
 cat << EOL
 Your wallet has now been set up for staking, please send the coins you wish to
@@ -291,7 +287,7 @@ social media channels.
 EOL
 
 until [  "$CONFIRMATION" = "I have read the above and agree"  ]; do
-    read -e -p "Please confirm you have written down your password and encrypted key somewhere
+    read -erp "Please confirm you have written down your password and encrypted key somewhere
     safe by typing \"I have read the above and agree\" : " CONFIRMATION
 done
 
@@ -299,7 +295,7 @@ echo "Thank you for installing your Bulwark staking wallet, now finishing instal
 
 unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 
-set -o history
+sudo set -o history
 clear
 
 echo "Staking wallet operational. Do not forget to unlock your wallet!"
