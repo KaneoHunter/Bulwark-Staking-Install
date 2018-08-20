@@ -121,9 +121,9 @@ After=network.target
 [Service]
 Type=forking
 User=${USER}
-WorkingDirectory=${HOME}
-ExecStart=/usr/local/bin/bulwarkd -conf=${HOME}/.bulwark/bulwark.conf -datadir=${HOME}/.bulwark
-ExecStop=/usr/local/bin/bulwark-cli -conf=${HOME}/.bulwark/bulwark.conf -datadir=${HOME}/.bulwark stop
+WorkingDirectory=${USERHOME}
+ExecStart=/usr/local/bin/bulwarkd -conf=${USERHOME}/.bulwark/bulwark.conf -datadir=${USERHOME}/.bulwark
+ExecStop=/usr/local/bin/bulwark-cli -conf=${USERHOME}/.bulwark/bulwark.conf -datadir=${USERHOME}/.bulwark stop
 Restart=on-failure
 RestartSec=1m
 StartLimitIntervalSec=5m
