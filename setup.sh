@@ -302,4 +302,4 @@ unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 set -o history
 clear
 
-echo "Staking wallet operational."
+echo "Staking wallet operational. Do not forget to unlock your wallet!"

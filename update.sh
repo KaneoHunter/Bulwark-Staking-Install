@@ -109,4 +109,4 @@ done
 
 clear
 
-echo "Your wallet is now up to date!"
+echo "Bulwark is now up to date. Do not forget to unlock your wallet!"

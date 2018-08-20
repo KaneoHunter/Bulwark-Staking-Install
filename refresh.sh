@@ -49,4 +49,4 @@ done
 
 clear
 
-echo "" && echo "Wallet refresh completed." && echo ""
+echo "" && echo "Wallet refresh completed. Do not forget to unlock your wallet!" && echo ""
