@@ -227,38 +227,34 @@ if [  -e /usr/local/bin/bulwark-decrypt ]; then sudo rm /usr/local/bin/bulwark-d
 sudo tee > /usr/local/bin/bulwark-decrypt << EOL
 #!/bin/bash
 
-#stop writing to history.
+# Stop writing to history
 set +o history
 
-#check bulwarkd is active. activate if not.
+# Ensure bulwarkd is active
 if ! systemctl is-active --quiet bulwarkd; then
   systemctl start bulwarkd
 fi
 
-#ask for password.
-read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type) : " ENCRYPTIONKEY && echo -e 'n'
-
-#confirm wallet is synced. wait if not.
+# Confirm wallet is synced
 until bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null; do
   echo -ne "Current block: "`bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1`'\r'
   sleep 1
 done
 
-#unlock wallet. confirm it's unlocked.
-until [ -n $(bulwark-cli getstakingstatus | grep walletunlocked | grep false) ]; do
+# Unlock wallet
+until bulwark-cli getstakingstatus | grep walletunlocked | grep true; do
 
   #ask for password and attempt it
   read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type) : " ENCRYPTIONKEY
   bulwark-cli walletpassphrase $ENCRYPTIONKEY 99999999 true
 done
 
-#tell user all was successful.
-clear
+# Tell user all was successful
 echo "Wallet successfully unlocked!"
 echo " "
 bulwark-cli getstakingstatus
 
-#restart history.
+# Restart history
 set -o history
 EOL
 
