@@ -188,17 +188,17 @@ if grep -Fxq "staking=1" "$USERHOME/.bulwark/bulwark.conf"; then
 fi
 
 # Generate new address and assign it a variable
-STAKINGADDRESS=$(bulwark-cli getnewaddress)
+STAKINGADDRESS=$(sudo su -c "bulwark-cli getnewaddress" $USER)
 
 # Ask for a password and apply it to a variable and confirm it.
 ENCRYPTIONKEY=1
 ENCRYPTIONKEYCONF=2
 echo "Please enter a password to encrypt your new staking address/wallet with, you will not see what you type appear."
 echo -e 'KEEP THIS SAFE, THIS CANNOT BE RECOVERED!\n'
-until [ "$ENCRYPTIONKEY" = "$ENCRYPTIONKEYCONF" ]; do
+until [ "'$ENCRYPTIONKEY'" = "$ENCRYPTIONKEYCONF" ]; do
 	read -ersp "Please enter your password   : " ENCRYPTIONKEY && echo -e '\n'
 	read -ersp "Please confirm your password : " ENCRYPTIONKEYCONF && echo -e '\n'
-	if [ "$ENCRYPTIONKEY" != "$ENCRYPTIONKEYCONF" ]; then
+	if [ "'$ENCRYPTIONKEY'" != "$ENCRYPTIONKEYCONF" ]; then
 		echo "Your passwords do not match, please try again."
 	else
 		echo "Password set."
@@ -206,11 +206,11 @@ until [ "$ENCRYPTIONKEY" = "$ENCRYPTIONKEYCONF" ]; do
 done
 
 # Encrypt the new address with the requested password
-BIP38=$(sudo su -c "bulwark-cli bip38encrypt $STAKINGADDRESS $ENCRYPTIONKEY" $USER)
+BIP38=$(sudo su -c "bulwark-cli bip38encrypt $STAKINGADDRESS '$ENCRYPTIONKEY'" $USER)
 echo "Address successfully encrypted! Please wait for encryption to finish..."
 
 # Encrypt the wallet with the same password
-sudo su -c "bulwark-cli encryptwallet $ENCRYPTIONKEY" $USER && echo "Wallet successfully encrypted!"
+sudo su -c "bulwark-cli encryptwallet '$ENCRYPTIONKEY'" $USER && echo "Wallet successfully encrypted!"
 
 # Wait for bulwarkd to close down after wallet encryption
 echo "Waiting for bulwarkd to restart..."
@@ -219,8 +219,11 @@ until  ! sudo systemctl is-active --quiet bulwarkd; do sleep 1; done
 # Open up bulwarkd again
 sudo systemctl start bulwarkd
 
+# Wait for bulwarkd to open up again
+until sudo su -c "bulwark-cli getinfo" $USER; do sleep 1; done
+
 # Unlock the wallet for a long time period
-sudo su -c "bulwark-cli walletpassphrase $ENCRYPTIONKEY 9999999999 true" $USER
+sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 9999999999 true" $USER
 
 # Create decrypt.sh and service
 
@@ -236,7 +239,7 @@ set +o history
 
 # Confirm wallet is synced
 until sudo su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" $USER; do
-  echo -ne "Current block: "$(bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1)'\\r'
+  echo -ne "Current block: "$(sudo su -c "bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1)'\\r'" $USER
   sleep 1
 done
 
@@ -245,13 +248,14 @@ until sudo su -c "bulwark-cli getstakingstatus | grep walletunlocked | grep true
 
   #ask for password and attempt it
   read -e -s -p "Please enter a password to decrypt your staking wallet (Your password will not show as you type) : " ENCRYPTIONKEY && echo "\\n"
-  sudo su -c "bulwark-cli walletpassphrase \$ENCRYPTIONKEY 99999999 true" $USER
+  sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 99999999 true" $USER
 done
 
 # Tell user all was successful
 echo "Wallet successfully unlocked!"
 echo " "
 sudo su -c "bulwark-cli getstakingstatus" $USER
+sudo su bulwark
 
 # Restart history
 set -o history
