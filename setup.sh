@@ -32,6 +32,7 @@ BOOTSTRAPARCHIVE="bootstrap.dat.xz"
 clear
 echo "This script will install a Bulwark staking wallet."
 read -rp "Press Ctrl-C to abort or any other key to continue. " -n1 -s
+
 clear
 
 # Install basic tools
