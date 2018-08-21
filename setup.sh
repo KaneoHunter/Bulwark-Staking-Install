@@ -105,7 +105,7 @@ wget "$BOOTSTRAPURL" && xz -cd "$BOOTSTRAPARCHIVE" > "$USERHOME/.bulwark/bootstr
 echo "Creating configuration files..."
 
 # Create bulwark.conf
-cat | sudo tee -a "$USERHOME/.bulwark/bulwark.conf" << EOL
+sudo tee -a "$USERHOME/.bulwark/bulwark.conf" << EOL
 rpcuser=${RPCUSER}
 rpcpassword=${RPCPASSWORD}
 rpcallowip=127.0.0.1
