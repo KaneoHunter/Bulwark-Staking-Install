@@ -195,10 +195,10 @@ ENCRYPTIONKEY=1
 ENCRYPTIONKEYCONF=2
 echo "Please enter a password to encrypt your new staking address/wallet with, you will not see what you type appear."
 echo -e 'KEEP THIS SAFE, THIS CANNOT BE RECOVERED!\n'
-until [ "'$ENCRYPTIONKEY'" = "$ENCRYPTIONKEYCONF" ]; do
+until [ "$ENCRYPTIONKEY" = "$ENCRYPTIONKEYCONF" ]; do
 	read -ersp "Please enter your password   : " ENCRYPTIONKEY && echo -e '\n'
 	read -ersp "Please confirm your password : " ENCRYPTIONKEYCONF && echo -e '\n'
-	if [ "'$ENCRYPTIONKEY'" != "$ENCRYPTIONKEYCONF" ]; then
+	if [ "$ENCRYPTIONKEY" != "$ENCRYPTIONKEYCONF" ]; then
 		echo "Your passwords do not match, please try again."
 	else
 		echo "Password set."
