@@ -133,7 +133,7 @@ systemctl start bulwarkd
 ```
 then wait 10 minutes more, before unlocking the wallet with the command:
 ```
-bulwark-cli walletpassphrase '<YOUR PASSWORD>' 99999999 true
+bulwark-decrypt
 ```
 Then, after a few more minutes of the network accepting your stakes, you should find everything to be true when you run
 ```
