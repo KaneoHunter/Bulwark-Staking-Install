@@ -309,6 +309,8 @@ unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 set -o history
 clear
 
-cd ~ || exit
-
 echo "Staking wallet operational. Do not forget to unlock your wallet!"
+
+#logs user in to bulwark account from root
+sudo su bulwark
+cd ~ || exit
