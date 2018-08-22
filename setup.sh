@@ -264,9 +264,6 @@ EOL
 sudo chmod a+x /usr/local/bin/bulwark-decrypt
 sudo chown -R $USER:$USER "$USERHOME/.bulwark/"
 
-#logs user in to bulwark account from root
-sudo su bulwark
-
 cat << EOL
 Your wallet has now been set up for staking, please send the coins you wish to
 stake to ${STAKINGADDRESS}. Once your wallet is synced your coins should begin
@@ -308,6 +305,8 @@ unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 set -o history
 clear
 
-cd
-
 echo "Staking wallet operational. Do not forget to unlock your wallet!"
+
+#logs user in to bulwark account from root
+sudo su bulwark
+cd
