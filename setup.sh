@@ -263,8 +263,10 @@ EOL
 sudo chmod a+x /usr/local/bin/bulwark-decrypt
 sudo chown -R $USER:$USER "$USERHOME/.bulwark/"
 
-#logs user in to bulwark account from root
-sudo su bulwark
+# Create bulwark-cli alias for root
+echo alias bulwark-cli="bulwark-cli --conf=/home/bulwark/.bulwark/bulwark.conf --datadir=/home/bulwark/.bulwark/" > ~/.bashrc
+# shellcheck source=/dev/null
+source ~/.bashrc
 
 cat << EOL
 Your wallet has now been set up for staking, please send the coins you wish to
