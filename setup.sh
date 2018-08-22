@@ -264,6 +264,9 @@ EOL
 sudo chmod a+x /usr/local/bin/bulwark-decrypt
 sudo chown -R $USER:$USER "$USERHOME/.bulwark/"
 
+#logs user in to bulwark account from root
+sudo su bulwark
+
 cat << EOL
 Your wallet has now been set up for staking, please send the coins you wish to
 stake to ${STAKINGADDRESS}. Once your wallet is synced your coins should begin
@@ -280,8 +283,7 @@ lines to assist with recovery if ever needed.
 ${BIP38}
 
 If your bulwarkd restarts, and you need to unlock your wallet again, use
-the included script by running "systemctl start decryptwallet" to unlock your
-wallet securely.
+the included script by typing "bulwark-decrypt" to unlock your wallet securely.
 
 After the installation script ends, we will wipe all history and have no
 storage record of your password, encrypted key, or addresses.

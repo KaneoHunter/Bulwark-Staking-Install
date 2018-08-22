@@ -14,7 +14,7 @@ Start the wallet - `systemctl start bulwarkd`
 Stop the wallet - `systemctl stop bulwarkd`  
 Restart the wallet - `systemctl restart bulwarkd`  
 Upload a debug log for devs/mods to look at (copy/paste us the output it gives!) - `curl --upload-file ~/.bulwark/debug.log https://transfer.sh/debug.log`  
-Unlock your wallet for staking - TBA  
+Unlock your wallet for staking - `bulwark-decrypt`  
 Find out if staking is working - `bulwark-cli getstakingstatus`  
 See your current balance - `bulwark-cli getbalance`  
 Find out information about your wallet - `bulwark-cli getinfo`  
