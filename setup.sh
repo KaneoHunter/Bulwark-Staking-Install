@@ -43,7 +43,7 @@ sudo apt-get install git dnsutils systemd -y > /dev/null 2>&1
 sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
 
 # Create a bulwark user
-adduser bulwark --gecos "First Last,RoomNumber,WorkPhone,HomePhone" > /dev/null
+adduser bulwark --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password > /dev/null
 
 # Set the user
 USER=bulwark
@@ -303,13 +303,10 @@ echo "Thank you for installing your Bulwark staking wallet, now finishing instal
 unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 
 set -o history
-
 clear
 
 echo "Staking wallet operational. Do not forget to unlock your wallet!"
 
 #logs user in to bulwark account from root
-echo "Please set a password to log-in to your VPS with..."
-passwd $USER
-sudo su $USER
-cd ~
+sudo su bulwark
+cd
