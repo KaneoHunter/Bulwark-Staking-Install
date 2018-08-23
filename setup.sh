@@ -238,23 +238,24 @@ sudo tee /usr/local/bin/bulwark-decrypt << EOL
 set +o history
 
 # Confirm wallet is synced
-until bulwark-cli --conf=/home/bulwark/.bulwark/bulwark.conf --datadir=/home/bulwark/.bulwark/ mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null; do
-  echo -ne "Current block: \$(sudo bulwark-cli --conf=/home/bulwark/.bulwark/bulwark.conf --datadir=/home/bulwark/.bulwark/ getinfo | grep blocks | awk '{print \$3}' | cut -d ',' -f 1)'\\r')"
+until sudo su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" $USER; do
+  echo -ne "Current block: "$(sudo su -c "bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1)'\\r'") $USER
   sleep 1
 done
 
 # Unlock wallet
-until bulwark-cli --conf=/home/bulwark/.bulwark/bulwark.conf --datadir=/home/bulwark/.bulwark/ getstakingstatus | grep walletunlocked | grep true; do
+until sudo su -c "bulwark-cli getstakingstatus | grep walletunlocked | grep true" $USER; do
 
   #ask for password and attempt it
   read -e -s -p "Please enter a password to decrypt your staking wallet. Your password will not show as you type : " ENCRYPTIONKEY && echo "\\n"
-  bulwark-cli --conf=/home/bulwark/.bulwark/bulwark.conf --datadir=/home/bulwark/.bulwark/ walletpassphrase "\$ENCRYPTIONKEY" 99999999 true
+  sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 99999999 true" $USER
 done
 
 # Tell user all was successful
 echo "Wallet successfully unlocked!"
 echo " "
-bulwark-cli --conf=/home/bulwark/.bulwark/bulwark.conf --datadir=/home/bulwark/.bulwark/ getstakingstatus
+sudo su -c "bulwark-cli getstakingstatus" $USER
+sudo su bulwark
 
 # Restart history
 set -o history
@@ -262,11 +263,6 @@ EOL
 
 sudo chmod a+x /usr/local/bin/bulwark-decrypt
 sudo chown -R $USER:$USER "$USERHOME/.bulwark/"
-
-# Create bulwark-cli alias for root
-echo alias bulwark-cli="bulwark-cli --conf=/home/bulwark/.bulwark/bulwark.conf --datadir=/home/bulwark/.bulwark/" > ~/.bashrc
-# shellcheck source=/dev/null
-source ~/.bashrc
 
 cat << EOL
 Your wallet has now been set up for staking, please send the coins you wish to
@@ -313,12 +309,7 @@ clear
 echo "Staking wallet operational. Do not forget to unlock your wallet!"
 
 #logs user in to bulwark account from root
-<<<<<<< HEAD
 echo "Please set a password to log-in to your VPS with..."
 passwd $USER
 sudo su $USER
 cd ~
-=======
-sudo su bulwark
-cd ~ || exit
->>>>>>> 3fa086e9e760d2faee102e9842078d6c1ac5fd8e
