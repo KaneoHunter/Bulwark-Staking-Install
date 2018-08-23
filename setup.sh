@@ -313,6 +313,12 @@ clear
 echo "Staking wallet operational. Do not forget to unlock your wallet!"
 
 #logs user in to bulwark account from root
-echo "Please set a password to log-in to your VPS with, your username will be $USER"
+<<<<<<< HEAD
+echo "Please set a password to log-in to your VPS with..."
 passwd $USER
-sudo su $USER && cd ~
+sudo su $USER
+cd ~
+=======
+sudo su bulwark
+cd ~ || exit
+>>>>>>> 3fa086e9e760d2faee102e9842078d6c1ac5fd8e
