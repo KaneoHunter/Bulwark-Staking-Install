@@ -83,7 +83,7 @@ done
 
 sudo mkdir /home/bulwark/.ssh
 echo "$PUBKEY" | sudo tee -a /home/bulwark/.ssh/authorized_keys &> /dev/null
-sudo hown -R bulwark:bulwark /home/bulwark/.ssh
+sudo chown -R bulwark:bulwark /home/bulwark/.ssh
 
 # Generate random passwords
 RPCUSER=$(dd if=/dev/urandom bs=3 count=512 status=none | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
