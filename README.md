@@ -2,7 +2,9 @@
 
 ## Before you start
 
-This script will try to create a safe environment for remote staking by hardening the remote server you stake on and force you to choose secure passwords for the user account accessing the server. In total, you will set up three different passwords:
+This script will try to create a safe environment for remote staking by hardening the remote server you stake on and force you to choose secure passwords for the user account accessing the server.
+
+In total, you will set up three different passwords:
 
 1.) An account password for the user you log in with  
 2.) A SSH Key password for the key you authenticate with  
@@ -14,7 +16,9 @@ During the installation, you will be asked to paste your SSH public key. If you 
 
 ## Overview
 
-The installation will assumes a freshly installed Ubuntu 16.04 VPS. It will install dependencies and needed software for the installation, set up a user account that you can use to log into the server (logging in as root will be deactivated for security reasons), apply various patches to make the server more secure, then reboot it. After the reboot, you can log in with the new account and activate staking.
+The installation will assumes a freshly installed Ubuntu 16.04 VPS. It will install dependencies and needed software for the installation, set up a user account that you can use to log into the server (logging in as root will be deactivated for security reasons), apply various patches to make the server more secure, then reboot it.
+
+After the reboot, you can log in with the new account and activate staking.
 
 ## Installation
 
@@ -100,7 +104,7 @@ This means your wallet isn't unlocked, just run the below:
 bulwark-cli walletpassphrase '<YOUR PASSWORD>' 99999999 true
 ```
 
-This will unlock your wallet for staking only for a long time period. Unlocking for staking only means your funds are safe even if a malicious entity got access to your VPS.
+This will unlock your wallet for staking only for a long time period.
 
 ### "Mintablecoins"
 
@@ -171,5 +175,3 @@ Then, after a few more minutes of the network accepting your stakes, you should 
 ```bash
 bulwark-cli getstakingstatus
 ```
-
-again!
