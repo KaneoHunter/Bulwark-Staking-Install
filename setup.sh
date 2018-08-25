@@ -43,10 +43,12 @@ sudo apt-get install git dnsutils systemd libpam_cracklib -y > /dev/null 2>&1
 sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
 
 # Create a bulwark user
-adduser bulwark --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password > /dev/null
+sudo adduser bulwark --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password > /dev/null
 
 # Set cracklib to require secure passwords and force even root to use them
-sed -i '/pam_cracklib.so/ s/retry=3 minlen=8 difok=3/retry=10 minlen=8 dcredit=0 ucredit=0 lcredit=0 ocredit=0 difok=3 reject_username enforce_for_root/g' /etc/pam.d/common-password
+sudo sed -i '/pam_cracklib.so/ s/retry=3 minlen=8 difok=3/retry=10 minlen=8 dcredit=0 ucredit=0 lcredit=0 ocredit=0 difok=3 reject_username enforce_for_root/g' /etc/pam.d/common-password
+
+clear
 
 # Ask for a password, confirm it, then set the permissions for user bulwark
 echo "Please enter a password for the bulwark user on your system."
@@ -57,10 +59,10 @@ echo "USE A STRONG PASSWORD AND KEEP IT IN A SAFE PLACE."
 sleep 1
 echo -e "IF YOUR ACCOUNT GETS COMPROMISED, YOUR FUNDS CAN BE STOLEN!\\n"
 sleep 1
-until passwd bulwark; do passwd bulwark; done
+until sudo passwd bulwark; do sudo passwd bulwark; done
 
 # Now that bulwark has a password, the account can be a sudoer
-usermod -aG sudo bulwark
+sudo usermod -aG sudo bulwark
 
 clear 
 
@@ -79,9 +81,9 @@ done
 
 # Write the public key
 
-mkdir /home/bulwark/.ssh
-echo "$PUBKEY" | tee -a /home/bulwark/.ssh/authorized_keys
-chown -R bulwark:bulwark /home/bulwark/.ssh
+sudo mkdir /home/bulwark/.ssh
+echo "$PUBKEY" | sudo tee -a /home/bulwark/.ssh/authorized_keys &> /dev/null
+sudo hown -R bulwark:bulwark /home/bulwark/.ssh
 
 # Generate random passwords
 RPCUSER=$(dd if=/dev/urandom bs=3 count=512 status=none | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
@@ -100,7 +102,7 @@ sudo apt-get -qq install libdb4.8-dev libdb4.8++-dev libminiupnpc-dev libqt4-dev
 # Install Fail2Ban
 sudo aptitude -y -q install fail2ban
 # Reduce Fail2Ban memory usage - http://hacksnsnacks.com/snippets/reduce-fail2ban-memory-usage/
-echo "ulimit -s 256" | sudo tee -a /etc/default/fail2ban
+echo "ulimit -s 256" | sudo tee -a /etc/default/fail2ban &> /dev/null
 sudo service fail2ban restart
 
 
@@ -139,7 +141,7 @@ wget "$BOOTSTRAPURL" && xz -cd "$BOOTSTRAPARCHIVE" > "/home/bulwark/.bulwark/boo
 echo "Creating configuration files..."
 
 # Create bulwark.conf
-sudo tee -a "/home/bulwark/.bulwark/bulwark.conf" << EOL
+sudo tee -a "/home/bulwark/.bulwark/bulwark.conf" &> /dev/null << EOL
 rpcuser=${RPCUSER}
 rpcpassword=${RPCPASSWORD}
 rpcallowip=127.0.0.1
@@ -153,7 +155,7 @@ EOL
 sudo chmod 0600 "/home/bulwark/.bulwark/bulwark.conf"
 sudo chown -R bulwark:bulwark "/home/bulwark/.bulwark"
 
-sudo tee -a /etc/systemd/system/bulwarkd.service << EOL
+sudo tee -a /etc/systemd/system/bulwarkd.service &> /dev/null << EOL
 [Unit]
 Description=Bulwarks's distributed currency daemon
 After=network.target
@@ -265,7 +267,7 @@ sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 9999999999 true" bulwa
 if [  -e /usr/local/bin/bulwark-decrypt ]; then sudo rm /usr/local/bin/bulwark-decrypt; fi
 
 #create decrypt.sh
-sudo tee /usr/local/bin/bulwark-decrypt << EOL
+sudo tee &> /dev/null /usr/local/bin/bulwark-decrypt << EOL
 #!/bin/bash
 
 # Stop writing to history
@@ -332,7 +334,7 @@ until [  "$CONFIRMATION" = "I have read the above and agree"  ]; do
     safe by typing \"I have read the above and agree\" : " CONFIRMATION
 done
 
-echo "Thank you for installing your Bulwark staking wallet, now finishing installation..."
+echo "Thank you for installing your Bulwark staking wallet!"
 
 unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 
@@ -343,10 +345,12 @@ echo "Staking wallet operational. Will now harden your system and reboot."
 sleep 2
 
 # Harden fstab
-sed -i '/tmpfs/ s/defaults\s/defaults,nodev,nosuid,noexec /g' /etc/fstab
+echo "Hardening fstab..."
+sudo sed -i '/tmpfs/ s/defaults\s/defaults,nodev,nosuid,noexec /g' /etc/fstab
 
 # Harden networking layer
-cat << EOL | tee -a /etc/sysctl.conf 
+echo "Adding networking rules..."
+sudo tee -a /etc/sysctl.conf &> /dev/null << EOL
 
 # IP Spoofing protection
 net.ipv4.conf.all.rp_filter = 1
@@ -386,7 +390,8 @@ net.ipv4.icmp_echo_ignore_all = 1
 EOL
 
 # Harden sshd_config
-cat << EOL | tee /etc/ssh/sshd_config
+echo "Hardening sshd_config..."
+sudo tee /etc/ssh/sshd_config &> /dev/null << EOL
 # Bulwark-Staking-Install generated configuration file
 # See the sshd_config(5) manpage for details
 
@@ -489,14 +494,16 @@ UsePAM no
 EOL
 
 # Prevent spoofing
-cat << EOL | sudo tee /etc/host.conf
+echo "Preventing spoofing..."
+sudo tee /etc/host.conf &> /dev/null << EOL
 # The "order" line is only used by old versions of the C library.
 order bind,hosts
 nospoof on
 EOL
 
 # Add unattended upgrades
-apt install -y unattended-upgrades
+echo "Adding unattended upgrades..."
+sudo apt install -y unattended-upgrades &> /dev/null
 
 clear
 echo "Hardening complete."
@@ -523,4 +530,4 @@ EOL
 sleep 5
 echo "Press Enter to reboot."
 read -r 
-shutdown -r now
+sudo shutdown -r now
