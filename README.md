@@ -4,8 +4,8 @@
 
 This script will try to create a safe environment for remote staking by hardening the remote server you stake on and force you to choose secure passwords for the user account accessing the server. In total, you will set up three different passwords:
 
-1.) An account password for the user you log in with
-2.) A SSH Key password for the key you authenticate with
+1.) An account password for the user you log in with  
+2.) A SSH Key password for the key you authenticate with  
 3.) A wallet password for your Bulwark staking wallet
 
 Please make sure that all three follow [common guidelines](https://en.wikipedia.org/wiki/Password_strength#Common_guidelines) for secure passwords. **A staking server holds the actual coins you stake, and if it gets compromised, your funds can be stolen.**
