@@ -19,7 +19,7 @@ fi
 echo "Installing curl..."
 sudo apt-get install -y curl
 
-# Set these to change the version of Bulwark to install
+# Set the correct download path
 
 VPSTARBALLURL=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4)
 VPSTARBALLNAME=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/releases/latest | grep browser_download_url | grep linux64 | cut -d '"' -f 4 | cut -d "/" -f 9)
@@ -37,7 +37,7 @@ clear
 
 # Install basic tools
 echo "Preparing installation..."
-sudo apt-get install git dnsutils systemd -y > /dev/null 2>&1
+sudo apt-get install git dnsutils systemd libpam_cracklib -y > /dev/null 2>&1
 
 # Check for systemd
 sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
@@ -45,9 +45,43 @@ sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you
 # Create a bulwark user
 adduser bulwark --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password > /dev/null
 
-# Set the user
-USER=bulwark
-USERHOME=$(eval echo "~bulwark")
+# Set cracklib to require secure passwords and force even root to use them
+sed -i '/pam_cracklib.so/ s/retry=3 minlen=8 difok=3/retry=10 minlen=8 dcredit=0 ucredit=0 lcredit=0 ocredit=0 difok=3 reject_username enforce_for_root/g' /etc/pam.d/common-password
+
+# Ask for a password, confirm it, then set the permissions for user bulwark
+echo "Please enter a password for the bulwark user on your system."
+echo "This user will be a sudoer - please make sure you understand the implications of this."
+echo "See https://en.wikipedia.org/wiki/Sudo for more information."
+sleep 3
+echo "USE A STRONG PASSWORD AND KEEP IT IN A SAFE PLACE."
+sleep 1
+echo -e "IF YOUR ACCOUNT GETS COMPROMISED, YOUR FUNDS CAN BE STOLEN!\\n"
+sleep 1
+until passwd bulwark; do passwd bulwark; done
+
+# Now that bulwark has a password, the account can be a sudoer
+usermod -aG sudo bulwark
+
+clear 
+
+# TODO: Explain how to get a public key. Wait for the user.
+
+# Read public key from user.
+echo -e "Please paste the public key you generated here and press Enter: \\n"
+read -er PUBKEY
+
+# Check public key is correct
+until echo "$PUBKEY" | ssh-keygen -lf /dev/stdin  &>/dev/null; do 
+    echo "Incorrect key."
+    echo -e "Please paste the public key you generated here and press Enter: \\n"
+    read -er PUBKEY && echo ""
+done
+
+# Write the public key
+
+mkdir /home/bulwark/.ssh
+echo "$PUBKEY" | tee -a /home/bulwark/.ssh/authorized_keys
+chown -R bulwark:bulwark /home/bulwark/.ssh
 
 # Generate random passwords
 RPCUSER=$(dd if=/dev/urandom bs=3 count=512 status=none | tr -dc 'a-zA-Z0-9' | fold -w 12 | head -n 1)
@@ -96,16 +130,16 @@ sudo mv "./bulwark-$BWKVERSION/bulwark-tx" /usr/local/bin
 rm -rf "bulwark-$BWKVERSION"
 
 # Create .bulwark directory
-mkdir "$USERHOME/.bulwark"
+mkdir "/home/bulwark/.bulwark"
 
 # Install bootstrap file
 echo "Installing bootstrap file..."
-wget "$BOOTSTRAPURL" && xz -cd "$BOOTSTRAPARCHIVE" > "$USERHOME/.bulwark/bootstrap.dat" && rm "$BOOTSTRAPARCHIVE"
+wget "$BOOTSTRAPURL" && xz -cd "$BOOTSTRAPARCHIVE" > "/home/bulwark/.bulwark/bootstrap.dat" && rm "$BOOTSTRAPARCHIVE"
 
 echo "Creating configuration files..."
 
 # Create bulwark.conf
-sudo tee -a "$USERHOME/.bulwark/bulwark.conf" << EOL
+sudo tee -a "/home/bulwark/.bulwark/bulwark.conf" << EOL
 rpcuser=${RPCUSER}
 rpcpassword=${RPCPASSWORD}
 rpcallowip=127.0.0.1
@@ -116,8 +150,8 @@ logtimestamps=1
 maxconnections=256
 staking=1
 EOL
-sudo chmod 0600 "$USERHOME/.bulwark/bulwark.conf"
-sudo chown -R $USER:$USER "$USERHOME/.bulwark"
+sudo chmod 0600 "/home/bulwark/.bulwark/bulwark.conf"
+sudo chown -R bulwark:bulwark "/home/bulwark/.bulwark"
 
 sudo tee -a /etc/systemd/system/bulwarkd.service << EOL
 [Unit]
@@ -125,10 +159,10 @@ Description=Bulwarks's distributed currency daemon
 After=network.target
 [Service]
 Type=forking
-User=${USER}
-WorkingDirectory=${USERHOME}
-ExecStart=/usr/local/bin/bulwarkd -conf=${USERHOME}/.bulwark/bulwark.conf -datadir=${USERHOME}/.bulwark
-ExecStop=/usr/local/bin/bulwark-cli -conf=${USERHOME}/.bulwark/bulwark.conf -datadir=${USERHOME}/.bulwark stop
+User=bulwark
+WorkingDirectory=/home/bulwark
+ExecStart=/usr/local/bin/bulwarkd -conf=/home/bulwark/.bulwark/bulwark.conf -datadir=/home/bulwark/.bulwark
+ExecStop=/usr/local/bin/bulwark-cli -conf=/home/bulwark/.bulwark/bulwark.conf -datadir=/home/bulwark/.bulwark stop
 Restart=on-failure
 RestartSec=1m
 StartLimitIntervalSec=5m
@@ -141,7 +175,7 @@ sudo systemctl enable bulwarkd
 echo "Starting bulwarkd..."
 sudo systemctl start bulwarkd
 
-until sudo su -c "$(bulwark-cli getconnectioncount 2>/dev/null)" $USER; do
+until sudo su -c "$(bulwark-cli getconnectioncount 2>/dev/null)" bulwark; do
   sleep 1
 done
 
@@ -151,7 +185,7 @@ if ! sudo systemctl status bulwarkd | grep -q "active (running)"; then
 fi
 
 echo "Waiting for wallet to load..."
-until sudo su -c "bulwark-cli getinfo 2>/dev/null | grep -q 'version'" $USER; do
+until sudo su -c "bulwark-cli getinfo 2>/dev/null | grep -q 'version'" bulwark; do
   sleep 1;
 done
 
@@ -169,26 +203,26 @@ echo "Setting Up Staking Address.."
 
 # Check to make sure the bulwarkd sync process is finished, so it isn't interrupted and forced to start over later.'
 echo "The script will begin set up staking once bulwarkd has finished syncing. Please allow this process to finish."
-until sudo su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" $USER; do
-  echo -ne "Current block: ""$(sudo su -c "bulwark-cli getinfo" $USER | grep blocks | awk '{print $3}' | cut -d ',' -f 1)"'\r'
+until sudo su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" bulwark; do
+  echo -ne "Current block: ""$(sudo su -c "bulwark-cli getinfo" bulwark | grep blocks | awk '{print $3}' | cut -d ',' -f 1)"'\r'
   sleep 1
 done
 
 # Ensure the .conf exists
-sudo touch "$USERHOME/.bulwark/bulwark.conf"
+sudo touch "/home/bulwark/.bulwark/bulwark.conf"
 
 # If the line does not already exist, adds a line to bulwark.conf to instruct the wallet to stake
 
-sudo sed -i 's/staking=0/staking=1/' "$USERHOME/.bulwark/bulwark.conf"
+sudo sed -i 's/staking=0/staking=1/' "/home/bulwark/.bulwark/bulwark.conf"
 
-if grep -Fxq "staking=1" "$USERHOME/.bulwark/bulwark.conf"; then
+if grep -Fxq "staking=1" "/home/bulwark/.bulwark/bulwark.conf"; then
   	echo "Staking Already Active"
   else
-  	echo "staking=1" | sudo tee -a "$USERHOME/.bulwark/bulwark.conf"
+  	echo "staking=1" | sudo tee -a "/home/bulwark/.bulwark/bulwark.conf"
 fi
 
 # Generate new address and assign it a variable
-STAKINGADDRESS=$(sudo su -c "bulwark-cli getnewaddress" $USER)
+STAKINGADDRESS=$(sudo su -c "bulwark-cli getnewaddress" bulwark)
 
 # Ask for a password and apply it to a variable and confirm it.
 ENCRYPTIONKEY=1
@@ -206,11 +240,11 @@ until [ "$ENCRYPTIONKEY" = "$ENCRYPTIONKEYCONF" ]; do
 done
 
 # Encrypt the new address with the requested password
-BIP38=$(sudo su -c "bulwark-cli bip38encrypt $STAKINGADDRESS '$ENCRYPTIONKEY'" $USER)
+BIP38=$(sudo su -c "bulwark-cli bip38encrypt $STAKINGADDRESS '$ENCRYPTIONKEY'" bulwark)
 echo "Address successfully encrypted! Please wait for encryption to finish..."
 
 # Encrypt the wallet with the same password
-sudo su -c "bulwark-cli encryptwallet '$ENCRYPTIONKEY'" $USER && echo "Wallet successfully encrypted!"
+sudo su -c "bulwark-cli encryptwallet '$ENCRYPTIONKEY'" bulwark && echo "Wallet successfully encrypted!"
 
 # Wait for bulwarkd to close down after wallet encryption
 echo "Waiting for bulwarkd to restart..."
@@ -220,10 +254,10 @@ until  ! sudo systemctl is-active --quiet bulwarkd; do sleep 1; done
 sudo systemctl start bulwarkd
 
 # Wait for bulwarkd to open up again
-until sudo su -c "bulwark-cli getinfo" $USER; do sleep 1; done
+until sudo su -c "bulwark-cli getinfo" bulwark; do sleep 1; done
 
 # Unlock the wallet for a long time period
-sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 9999999999 true" $USER
+sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 9999999999 true" bulwark
 
 # Create decrypt.sh and service
 
@@ -238,23 +272,23 @@ sudo tee /usr/local/bin/bulwark-decrypt << EOL
 set +o history
 
 # Confirm wallet is synced
-until sudo su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" $USER; do
-  echo -ne "Current block: "$(sudo su -c "bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1)'\\r'") $USER
+until sudo su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" bulwark; do
+  echo -ne "Current block: "$(sudo su -c "bulwark-cli getinfo | grep blocks | awk '{print $3}' | cut -d ',' -f 1)'\\r'") bulwark
   sleep 1
 done
 
 # Unlock wallet
-until sudo su -c "bulwark-cli getstakingstatus | grep walletunlocked | grep true" $USER; do
+until sudo su -c "bulwark-cli getstakingstatus | grep walletunlocked | grep true" bulwark; do
 
   #ask for password and attempt it
   read -e -s -p "Please enter a password to decrypt your staking wallet. Your password will not show as you type : " ENCRYPTIONKEY && echo "\\n"
-  sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 99999999 true" $USER
+  sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 99999999 true" bulwark
 done
 
 # Tell user all was successful
 echo "Wallet successfully unlocked!"
 echo " "
-sudo su -c "bulwark-cli getstakingstatus" $USER
+sudo su -c "bulwark-cli getstakingstatus" bulwark
 sudo su bulwark
 
 # Restart history
@@ -262,7 +296,7 @@ set -o history
 EOL
 
 sudo chmod a+x /usr/local/bin/bulwark-decrypt
-sudo chown -R $USER:$USER "$USERHOME/.bulwark/"
+sudo chown -R bulwark:bulwark "/home/bulwark/.bulwark/"
 
 cat << EOL
 Your wallet has now been set up for staking, please send the coins you wish to
@@ -305,8 +339,188 @@ unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
 set -o history
 clear
 
-echo "Staking wallet operational. Do not forget to unlock your wallet!"
+echo "Staking wallet operational. Will now harden your system and reboot."
+sleep 2
 
-#logs user in to bulwark account from root
-sudo su bulwark
-cd || exit
+# Harden fstab
+sed -i '/tmpfs/ s/defaults\s/defaults,nodev,nosuid,noexec /g' /etc/fstab
+
+# Harden networking layer
+cat << EOL | tee -a /etc/sysctl.conf 
+
+# IP Spoofing protection
+net.ipv4.conf.all.rp_filter = 1
+net.ipv4.conf.default.rp_filter = 1
+
+# Ignore ICMP broadcast requests
+net.ipv4.icmp_echo_ignore_broadcasts = 1
+
+# Disable source packet routing
+net.ipv4.conf.all.accept_source_route = 0
+net.ipv6.conf.all.accept_source_route = 0 
+net.ipv4.conf.default.accept_source_route = 0
+net.ipv6.conf.default.accept_source_route = 0
+
+# Ignore send redirects
+net.ipv4.conf.all.send_redirects = 0
+net.ipv4.conf.default.send_redirects = 0
+
+# Block SYN attacks
+net.ipv4.tcp_syncookies = 1
+net.ipv4.tcp_max_syn_backlog = 2048
+net.ipv4.tcp_synack_retries = 2
+net.ipv4.tcp_syn_retries = 5
+
+# Log Martians
+net.ipv4.conf.all.log_martians = 1
+net.ipv4.icmp_ignore_bogus_error_responses = 1
+
+# Ignore ICMP redirects
+net.ipv4.conf.all.accept_redirects = 0
+net.ipv6.conf.all.accept_redirects = 0
+net.ipv4.conf.default.accept_redirects = 0 
+net.ipv6.conf.default.accept_redirects = 0
+
+# Ignore Directed pings
+net.ipv4.icmp_echo_ignore_all = 1
+EOL
+
+# Harden sshd_config
+cat << EOL | tee /etc/ssh/sshd_config
+# Bulwark-Staking-Install generated configuration file
+# See the sshd_config(5) manpage for details
+
+# What ports, IPs and protocols we listen for
+Port 22
+
+# Use these options to restrict which interfaces/protocols sshd will bind to
+#ListenAddress ::
+ListenAddress 0.0.0.0
+Protocol 2
+
+# HostKeys for protocol version 2
+HostKey /etc/ssh/ssh_host_ed25519_key
+HostKey /etc/ssh/ssh_host_rsa_key
+
+# Change default ciphers and algorithms
+KexAlgorithms curve25519-sha256@libssh.org
+Ciphers chacha20-poly1305@openssh.com,aes256-gcm@openssh.com,aes128-gcm@openssh.com,aes256-ctr,aes192-ctr,aes128-ctr
+MACs hmac-sha2-512-etm@openssh.com,hmac-sha2-256-etm@openssh.com,umac-128-etm@openssh.com
+
+#Privilege Separation is turned on for security
+UsePrivilegeSeparation yes
+
+# Lifetime and size of ephemeral version 1 server key
+KeyRegenerationInterval 3600
+ServerKeyBits 1024
+
+# Logging
+SyslogFacility AUTH
+LogLevel INFO
+
+# Authentication:
+LoginGraceTime 120
+PermitRootLogin no
+StrictModes yes
+AllowUsers bulwark
+
+RSAAuthentication yes
+PubkeyAuthentication yes
+AuthorizedKeysFile	%h/.ssh/authorized_keys
+
+# Don't read the user's ~/.rhosts and ~/.shosts files
+IgnoreRhosts yes
+# For this to work you will also need host keys in /etc/ssh_known_hosts
+RhostsRSAAuthentication no
+# similar for protocol version 2
+HostbasedAuthentication no
+# Uncomment if you don't trust ~/.ssh/known_hosts for RhostsRSAAuthentication
+#IgnoreUserKnownHosts yes
+
+# To enable empty passwords, change to yes (NOT RECOMMENDED)
+PermitEmptyPasswords no
+
+# Change to yes to enable challenge-response passwords (beware issues with
+# some PAM modules and threads)
+ChallengeResponseAuthentication no
+
+# Change to no to disable tunnelled clear text passwords
+PasswordAuthentication no
+
+# Kerberos options
+#KerberosAuthentication no
+#KerberosGetAFSToken no
+#KerberosOrLocalPasswd yes
+#KerberosTicketCleanup yes
+
+# GSSAPI options
+#GSSAPIAuthentication no
+#GSSAPICleanupCredentials yes
+
+X11Forwarding no 
+X11DisplayOffset 10
+PrintMotd no
+PrintLastLog yes
+TCPKeepAlive yes
+#UseLogin no
+
+#MaxStartups 10:30:60
+#Banner /etc/issue.net
+
+# Allow client to pass locale environment variables
+AcceptEnv LANG LC_*
+
+Subsystem sftp /usr/lib/openssh/sftp-server
+
+# Disconnect idle sessions
+ClientAliveInterval 300
+ClientAliveCountMax 2
+
+# Set this to 'yes' to enable PAM authentication, account processing,
+# and session processing. If this is enabled, PAM authentication will
+# be allowed through the ChallengeResponseAuthentication and
+# PasswordAuthentication.  Depending on your PAM configuration,
+# PAM authentication via ChallengeResponseAuthentication may bypass
+# the setting of "PermitRootLogin without-password".
+# If you just want the PAM account and session checks to run without
+# PAM authentication, then enable this but set PasswordAuthentication
+# and ChallengeResponseAuthentication to 'no'.
+UsePAM no
+EOL
+
+# Prevent spoofing
+cat << EOL | sudo tee /etc/host.conf
+# The "order" line is only used by old versions of the C library.
+order bind,hosts
+nospoof on
+EOL
+
+# Add unattended upgrades
+apt install -y unattended-upgrades
+
+clear
+echo "Hardening complete."
+sleep 1
+clear
+cat << EOL
+PLEASE NOTE:
+
+After the system reboots, you can no longer log in with the root user. You will need to
+log in with the bulwark user and the password you set earlier.
+
+The first time you try to log in after the reboot, you will get the following error:
+
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+
+Don't be alarmed, this is not because you were attacked, but because we set a different 
+host key to be used for SSH. Here's how you fix it:
+
+TODO: Info on how to fix hostname on all three OS
+
+EOL
+sleep 5
+echo "Press Enter to reboot."
+read -r 
+shutdown -r now
