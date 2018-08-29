@@ -2,9 +2,9 @@
 
 ## Before you start
 
-This script will try to create a safe environment for remote staking by hardening the remote server you stake on and force you to choose secure passwords for the user account accessing the server.
+Due to the higher security needs of a staking server (compared to a masternode), this script is **FOR ADVANCED USERS ONLY**. Please read the entire guide before you proceed.
 
-In total, you will set up three different passwords:
+This script will try to create a safe environment for remote staking by hardening the remote server you stake on. It will also help you with choosing a good user password. In total, you will set up three different passwords:
 
 1.) An account password for the user you log in with  
 2.) A SSH Key password for the key you authenticate with  
@@ -12,21 +12,47 @@ In total, you will set up three different passwords:
 
 Please make sure that all three follow [common guidelines](https://en.wikipedia.org/wiki/Password_strength#Common_guidelines) for secure passwords. **A staking server holds the actual coins you stake, and if it gets compromised, your funds can be stolen.**
 
-During the installation, you will be asked to paste your SSH public key. If you are unfamiliar with SSH and key authentication, please read about the [protocol](https://www.ssh.com/ssh/protocol/) and [keys](https://www.ssh.com/ssh/key/) before you continue. The shortest explanation is this: You can hand your public key to anyone, and your private key to **NO ONE**. If you need help with creating an SSH key pair, you can follow our TODO: Guide.
+During the installation, you will be asked to paste your SSH public key. If you are unfamiliar with SSH and key authentication, please read about the [protocol](https://www.ssh.com/ssh/protocol/) and [keys](https://www.ssh.com/ssh/key/) before you continue. The shortest explanation is this: You can hand your public key to anyone, and your private key to **NO ONE**. How to create an SSH key is explained [below](#Generating-an-SSH-key).
 
 ## Overview
 
 The installation will assumes a freshly installed Ubuntu 16.04 VPS. It will install dependencies and needed software for the installation, set up a user account that you can use to log into the server (logging in as root will be deactivated for security reasons), apply various patches to make the server more secure, then reboot it.
 
+At the end of the script, you will be informed that there will be an error about a changed host key the next time you log in. See [this paragraph](#REMOTE-HOST-IDENTIFICATION-HAS-CHANGED) on how to fix that.
+
 After the reboot, you can log in with the new account and activate staking.
 
 ## Installation
 
-To get started, run the below script:
+To get started, run this script:
 
 ```bash
 bash <( curl https://raw.githubusercontent.com/KaneoHunter/Bulwark-Staking-Install/master/setup.sh )
 ```
+
+## Generating an SSH key
+
+You will need an SSH key to log in to your staking host. If you do not have one, you need to generate one. Make sure you pick a safe password, and keep your keys safe. Here are instructions on how to generate such a key pair:
+
+- Windows: Follow [this guide](https://www.ssh.com/ssh/putty/windows/puttygen). Make sure you save your private key locally. Also note that you need to paste the key in an OpenSSH format, not in the format Putty uses. When your key is generated, you will see a window labelled "Public key for pasting into OpenSSH authorized_keys file" - that's the key you want to paste into the script.
+
+- Linux & macOS: Run the following command in a shell (Terminal.app for macOS, any shell for Linux): `ssh-keygen`
+  Pick a good password and save the key in the default location. To show your public key, run `cat ~/.ssh/id_rsa.pub`
+
+## REMOTE HOST IDENTIFICATION HAS CHANGED
+
+During the installation, the staking script will change the order of the SSH host keys for security reasons. As a result, the next time you log into your VPS or Raspberry Pi, you will get the following warning:
+
+```text
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+@    WARNING: REMOTE HOST IDENTIFICATION HAS CHANGED!     @
+@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
+```
+
+While this looks alarming, it is not dangerous (in this case). Here's how to get rid of it:
+
+- Windows: When Putty asks, "Do you want to continue with the connection?", say "Yes".
+- Linux & macOS: In a shell, run `ssh-keygen -R <host>`, where `<host>` is the IP or hostname of your staking server.
 
 ## Useful Commands
 

@@ -54,11 +54,10 @@ clear
 echo "Please enter a password for the bulwark user on your system."
 echo "This user will be a sudoer - please make sure you understand the implications of this."
 echo "See https://en.wikipedia.org/wiki/Sudo for more information."
-sleep 3
+echo ""
 echo "USE A STRONG PASSWORD AND KEEP IT IN A SAFE PLACE."
-sleep 1
 echo -e "IF YOUR ACCOUNT GETS COMPROMISED, YOUR FUNDS CAN BE STOLEN!\\n"
-sleep 1
+sleep 2
 until sudo passwd bulwark; do sudo passwd bulwark; done
 
 # Now that bulwark has a password, the account can be a sudoer
@@ -66,16 +65,17 @@ sudo usermod -aG sudo bulwark
 
 clear 
 
-# TODO: Explain how to get a public key. Wait for the user.
+echo "You will now add your public SSH key to the server for authentication."
+echo "If you do not have one, please follow the instructions in the README."
 
 # Read public key from user.
-echo -e "Please paste the public key you generated here and press Enter: \\n"
+echo -e "Please paste your public SSH key and press Enter: \\n"
 read -er PUBKEY
 
 # Check public key is correct
 until echo "$PUBKEY" | ssh-keygen -lf /dev/stdin  &>/dev/null; do 
     echo "Incorrect key."
-    echo -e "Please paste the public key you generated here and press Enter: \\n"
+    echo -e "Please paste your public SSH key and press Enter: \\n"
     read -er PUBKEY && echo ""
 done
 
@@ -507,7 +507,7 @@ sudo apt install -y unattended-upgrades &> /dev/null
 
 clear
 echo "Hardening complete."
-sleep 1
+sleep 2
 clear
 cat << EOL
 PLEASE NOTE:
@@ -522,9 +522,7 @@ The first time you try to log in after the reboot, you will get the following er
 @@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@@
 
 Don't be alarmed, this is not because you were attacked, but because we set a different 
-host key to be used for SSH. Here's how you fix it:
-
-TODO: Info on how to fix hostname on all three OS
+host key to be used for SSH. Please refer to the README on how to fix this.
 
 EOL
 sleep 5
