@@ -1,5 +1,13 @@
 # Bulwark-Staking-Install
 
+## Disclaimer
+
+This script is configured to install staking functionality with the utmost security and safety for your funds. Please ensure that the passwords you choose are a minimum of 16 characters with upper and lower case as well as numbers and symbols to help protect against brute force attacks.
+
+Performing any acts not expressly provided by the script will render your staking wallet incapable of the Bulwark team being able to provide tech support. Additionally, maintenance and coin safety are the sole responsibility of the user.
+
+If you do not expressly follow the script and the associated instructions, there is a very real chance your coins will be rendered inaccessible. Bulwark takes no responsibility for any coins that are lost or stolen.
+
 ## Before you start
 
 Due to the higher security needs of a staking server (compared to a masternode), this script is **FOR ADVANCED USERS ONLY**. Please read the entire guide before you proceed.

@@ -30,7 +30,24 @@ BOOTSTRAPURL=$(curl -s https://api.github.com/repos/bulwark-crypto/bulwark/relea
 BOOTSTRAPARCHIVE="bootstrap.dat.xz"
 
 clear
-echo "This script will install a Bulwark staking wallet."
+cat << EOL
+--------------------------------- DISCLAIMER ---------------------------------
+
+This script is configured to install staking functionality with the utmost 
+security and safety for your funds. Please ensure that the passwords you 
+choose are a minimum of 16 characters with upper and lower case as well as 
+numbers and symbols to help protect against brute force attacks.
+
+Performing any acts not expressly provided by the script will render your 
+staking wallet incapable of the Bulwark team being able to provide tech 
+support. Additionally, maintenance and coin safety are the sole 
+responsibility of the user.
+
+If you do not expressly follow the script and the associated instructions, 
+there is a very real chance your coins will be rendered inaccessible. 
+Bulwark takes no responsibility for any coins that are lost or stolen.
+
+EOL
 read -rp "Press Ctrl-C to abort or any other key to continue. " -n1 -s
 
 clear
