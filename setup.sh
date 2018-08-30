@@ -100,6 +100,10 @@ done
 
 sudo mkdir /home/bulwark/.ssh
 echo "$PUBKEY" | sudo tee -a /home/bulwark/.ssh/authorized_keys &> /dev/null
+sudo tee /home/bulwark/.ssh/rc &> /dev/null << EOL
+echo "Block Count: $(bulwark-cli getblockcount)"
+echo "Balance: $(sudo su -c 'bulwark-cli getbalance' bulwark) Unconfirmed: $(sudo su -c 'bulwark-cli getunconfirmedbalance' bulwark)"
+EOL
 sudo chown -R bulwark:bulwark /home/bulwark/.ssh
 
 # Generate random passwords
