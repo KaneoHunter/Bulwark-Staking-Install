@@ -111,16 +111,23 @@ RPCUSER=$(dd if=/dev/urandom bs=3 count=512 status=none | tr -dc 'a-zA-Z0-9' | f
 RPCPASSWORD=$(dd if=/dev/urandom bs=3 count=512 status=none | tr -dc 'a-zA-Z0-9' | fold -w 32 | head -n 1)
 
 # update packages and upgrade Ubuntu
-echo "Installing dependencies..."
+echo "Updating repository lists..."
 sudo apt-get -qq update
+echo "Installing upgrades..."
 sudo apt-get -qq upgrade
+echo "Autoremoving unneeded dependencies..."
 sudo apt-get -qq autoremove
+echo "Installing dependencies..."
 sudo apt-get -qq install wget htop xz-utils build-essential libtool autoconf automake software-properties-common
+echo "Adding repositories..."
 sudo add-apt-repository -y ppa:bitcoin/bitcoin
+echo "Updating added repository lists..."
 sudo apt update
+echo "Installing tools..."
 sudo apt-get -qq install protobuf-compiler git pkg-config aptitude
 
 # Install Fail2Ban
+echo "Installing Fail2Ban..."
 sudo aptitude -y -q install fail2ban
 # Reduce Fail2Ban memory usage - http://hacksnsnacks.com/snippets/reduce-fail2ban-memory-usage/
 echo "ulimit -s 256" | sudo tee -a /etc/default/fail2ban &> /dev/null
@@ -128,13 +135,16 @@ sudo service fail2ban restart
 
 
 # Install UFW
+echo "Installing UFW..."
 sudo apt-get -qq install ufw
+echo "Configuring firewall..."
 sudo ufw default deny incoming
 sudo ufw default allow outgoing
 sudo ufw allow ssh
 sudo ufw allow 52543/tcp
 yes | sudo ufw enable
 
+echo "Downloading binaries..."
 if grep -q "ARMv7" /proc/cpuinfo; then
   # Install Bulwark daemon for ARMv7 systems
   wget "$SHNTARBALLURL"
@@ -147,13 +157,15 @@ else
   rm "$VPSTARBALLNAME"
 fi
 
+echo "Installing binaries..."
 sudo mv "./bulwark-$BWKVERSION/bulwarkd" /usr/local/bin
 sudo mv "./bulwark-$BWKVERSION/bulwark-cli" /usr/local/bin
 sudo mv "./bulwark-$BWKVERSION/bulwark-tx" /usr/local/bin
 rm -rf "bulwark-$BWKVERSION"
 
 # Create .bulwark directory
-mkdir "/home/bulwark/.bulwark"
+sudo mkdir "/home/bulwark/.bulwark"
+sudo chown bulwark:bulwark "/home/bulwark/.bulwark"
 
 # Install bootstrap file
 echo "Installing bootstrap file..."
