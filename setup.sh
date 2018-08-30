@@ -111,10 +111,10 @@ echo "Installing dependencies..."
 sudo apt-get -qq update
 sudo apt-get -qq upgrade
 sudo apt-get -qq autoremove
-sudo apt-get -qq install wget htop xz-utils build-essential libtool autotools-dev autoconf automake libssl-dev libboost-all-dev software-properties-common
+sudo apt-get -qq install wget htop xz-utils build-essential libtool autoconf automake software-properties-common
 sudo add-apt-repository -y ppa:bitcoin/bitcoin
 sudo apt update
-sudo apt-get -qq install libdb4.8-dev libdb4.8++-dev libminiupnpc-dev libqt4-dev libprotobuf-dev protobuf-compiler libqrencode-dev git pkg-config libzmq3-dev aptitude
+sudo apt-get -qq install protobuf-compiler git pkg-config aptitude
 
 # Install Fail2Ban
 sudo aptitude -y -q install fail2ban
