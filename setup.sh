@@ -130,15 +130,17 @@ echo "ulimit -s 256" | sudo tee -a /etc/default/fail2ban &> /dev/null
 sudo service fail2ban restart
 
 
-# Install UFW
-echo "Installing UFW..."
-sudo apt-get -qq install ufw
-echo "Configuring firewall..."
-sudo ufw default deny incoming
-sudo ufw default allow outgoing
-sudo ufw allow ssh
-sudo ufw allow 52543/tcp
-yes | sudo ufw enable
+if ! grep -q "ARMv7" /proc/cpuinfo; then
+  # Install UFW
+  echo "Installing UFW..."
+  sudo apt-get -qq install ufw
+  echo "Configuring firewall..."
+  sudo ufw default deny incoming
+  sudo ufw default allow outgoing
+  sudo ufw allow ssh
+  sudo ufw allow 52543/tcp
+  yes | sudo ufw enable
+fi
 
 echo "Downloading binaries..."
 if grep -q "ARMv7" /proc/cpuinfo; then
@@ -165,7 +167,6 @@ sudo mkdir "/home/bulwark/.bulwark"
 # Install bootstrap file
 echo "Installing bootstrap file..."
 sudo wget "$BOOTSTRAPURL" && sudo xz -d "$BOOTSTRAPARCHIVE" && sudo mv "bootstrap.dat" "/home/bulwark/.bulwark/"
-
 echo "Creating configuration files..."
 
 # Create bulwark.conf
