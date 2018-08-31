@@ -165,11 +165,10 @@ rm -rf "bulwark-$BWKVERSION"
 
 # Create .bulwark directory
 sudo mkdir "/home/bulwark/.bulwark"
-sudo chown bulwark:bulwark "/home/bulwark/.bulwark"
 
 # Install bootstrap file
 echo "Installing bootstrap file..."
-wget "$BOOTSTRAPURL" && xz -cd "$BOOTSTRAPARCHIVE" > "/home/bulwark/.bulwark/bootstrap.dat" && rm "$BOOTSTRAPARCHIVE"
+sudo wget "$BOOTSTRAPURL" && sudo xz -d "$BOOTSTRAPARCHIVE" && sudo mv "bootstrap.dat" "/home/bulwark/.bulwark/"
 
 echo "Creating configuration files..."
 
