@@ -24,7 +24,7 @@ During the installation, you will be asked to paste your SSH public key. If you 
 
 ## Overview
 
-The installation will assumes a freshly installed Ubuntu 16.04 VPS. It will install dependencies and needed software for the installation, set up a user account that you can use to log into the server (logging in as root will be deactivated for security reasons), apply various patches to make the server more secure, then reboot it.
+The installation will assumes a freshly installed Ubuntu 16.04 VPS or Raspberry Pi with Raspian Stretch Lite. It will install dependencies and needed software for the installation, set up a user account that you can use to log into the server (logging in as root will be deactivated for security reasons), apply various patches to make the server more secure, then reboot it.
 
 At the end of the script, you will be informed that there will be an error about a changed host key the next time you log in. See [this paragraph](#REMOTE-HOST-IDENTIFICATION-HAS-CHANGED) on how to fix that.
 
