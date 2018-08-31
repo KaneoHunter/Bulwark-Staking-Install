@@ -231,7 +231,7 @@ sleep 5
 
 # Ensure bulwarkd is active
   if sudo systemctl is-active --quiet bulwarkd; then
-  	sudo systemctl start bulwarkd
+    sudo systemctl start bulwarkd
 fi
 echo "Setting Up Staking Address.."
 
@@ -249,10 +249,10 @@ sudo touch "/home/bulwark/.bulwark/bulwark.conf"
 
 sudo sed -i 's/staking=0/staking=1/' "/home/bulwark/.bulwark/bulwark.conf"
 
-if grep -Fxq "staking=1" "/home/bulwark/.bulwark/bulwark.conf"; then
-  	echo "Staking Already Active"
+if sudo grep -Fxq "staking=1" "/home/bulwark/.bulwark/bulwark.conf"; then
+    echo "Staking Already Active"
   else
-  	echo "staking=1" | sudo tee -a "/home/bulwark/.bulwark/bulwark.conf"
+    echo "staking=1" | sudo tee -a "/home/bulwark/.bulwark/bulwark.conf"
 fi
 
 # Generate new address and assign it a variable
@@ -264,13 +264,13 @@ ENCRYPTIONKEYCONF=2
 echo "Please enter a password to encrypt your new staking address/wallet with, you will not see what you type appear."
 echo -e 'KEEP THIS SAFE, THIS CANNOT BE RECOVERED!\n'
 until [ "$ENCRYPTIONKEY" = "$ENCRYPTIONKEYCONF" ]; do
-	read -ersp "Please enter your password   : " ENCRYPTIONKEY && echo -e '\n'
-	read -ersp "Please confirm your password : " ENCRYPTIONKEYCONF && echo -e '\n'
-	if [ "$ENCRYPTIONKEY" != "$ENCRYPTIONKEYCONF" ]; then
-		echo "Your passwords do not match, please try again."
-	else
-		echo "Password set."
-	fi
+  read -ersp "Please enter your password   : " ENCRYPTIONKEY && echo -e '\n'
+  read -ersp "Please confirm your password : " ENCRYPTIONKEYCONF && echo -e '\n'
+  if [ "$ENCRYPTIONKEY" != "$ENCRYPTIONKEYCONF" ]; then
+    echo "Your passwords do not match, please try again."
+  else
+    echo "Password set."
+  fi
 done
 
 # Encrypt the new address with the requested password
@@ -459,7 +459,6 @@ LogLevel INFO
 LoginGraceTime 120
 PermitRootLogin no
 StrictModes yes
-AllowUsers bulwark
 
 RSAAuthentication yes
 PubkeyAuthentication yes
