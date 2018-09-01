@@ -320,7 +320,6 @@ done
 echo "Wallet successfully unlocked!"
 echo " "
 sudo su -c "bulwark-cli getstakingstatus" bulwark
-sudo su bulwark
 
 # Restart history
 set -o history
