@@ -2,7 +2,7 @@
 
 ## Disclaimer
 
-**This script might contain bugs or errors. You use this at your own risk.\***
+**This script might contain bugs or errors. You use this at your own risk.**
 
 This script is configured to install staking functionality with the utmost security and safety for your funds. Please ensure that the passwords you choose are a minimum of 16 characters with upper and lower case as well as numbers and symbols to help protect against brute force attacks.
 
