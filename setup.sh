@@ -536,6 +536,8 @@ sudo apt install -y unattended-upgrades &> /dev/null
 clear
 echo "Hardening complete."
 sleep 2
+echo "Shutting down bulwarkd..."
+sudo systemctl stop bulwarkd
 clear
 cat << EOL
 PLEASE NOTE:
