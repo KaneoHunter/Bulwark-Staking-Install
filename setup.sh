@@ -63,7 +63,7 @@ sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you
 sudo adduser bulwark --gecos "First Last,RoomNumber,WorkPhone,HomePhone" --disabled-password > /dev/null
 
 # Set cracklib to require secure passwords and force even root to use them
-sudo sed -i '/pam_cracklib.so/ s/retry=3 minlen=12 difok=3/retry=10 minlen=8 dcredit=0 ucredit=0 lcredit=0 ocredit=0 difok=3 reject_username enforce_for_root/g' /etc/pam.d/common-password
+sudo sed -i '/pam_cracklib.so/ s/retry=3 minlen=8 difok=3/retry=10 minlen=12 dcredit=0 ucredit=0 lcredit=0 ocredit=0 difok=3 reject_username enforce_for_root/g' /etc/pam.d/common-password
 
 clear
 
