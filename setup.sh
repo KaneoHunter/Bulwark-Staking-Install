@@ -346,9 +346,8 @@ done
 
 echo "Thank you for installing your Bulwark staking wallet!"
 
-unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY BIP38 STAKINGADDRESS
+unset CONFIRMATION ENCRYPTIONKEYCONF ENCRYPTIONKEY 
 
-set -o history
 clear
 
 echo "Staking wallet operational. Will now harden your system and reboot."
@@ -542,6 +541,8 @@ And here is your BIP38 information:
 ${BIP38}
 
 EOL
+unset BIP38 STAKINGADDRESS
+set -o history
 sleep 5
 echo "Press Enter to reboot."
 read -r 
