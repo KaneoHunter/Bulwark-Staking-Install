@@ -75,7 +75,7 @@ echo ""
 echo "USE A STRONG PASSWORD AND KEEP IT IN A SAFE PLACE."
 echo -e "IF YOUR ACCOUNT GETS COMPROMISED, YOUR FUNDS CAN BE STOLEN!\\n"
 sleep 2
-until sudo passwd bulwark; do sudo passwd bulwark; done
+until sudo passwd bulwark; do echo "Please try again."; done
 
 # Now that bulwark has a password, the account can be a sudoer
 sudo usermod -aG sudo bulwark
