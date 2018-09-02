@@ -292,7 +292,7 @@ done
 until sudo su -c "bulwark-cli getstakingstatus | grep walletunlocked | grep true" bulwark; do
 
   #ask for password and attempt it
-  read -e -s -p "Please enter a password to decrypt your staking wallet. Your password will not show as you type : " ENCRYPTIONKEY && echo "\\n"
+  read -e -s -p "Please enter a password to decrypt your staking wallet. Your password will not show as you type : " ENCRYPTIONKEY
   sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 99999999 true" bulwark
 done
 
