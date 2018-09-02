@@ -13,7 +13,7 @@ read -pr "Press Ctrl-C to abort or any other key to continue. " -n1 -s
 clear
 
 USER=bulwark
-USERHOME=$(eval echo "~bulwark")
+USERHOME=/home/bulwark
 
 sudo systemctl stop bulwarkd
 

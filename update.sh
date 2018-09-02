@@ -19,14 +19,14 @@ if [ "$(id -u)" != "0" ]; then
   exit 1
 fi
 
-USER="$("ps u $(pgrep bulwarkd)" | grep bulwarkd | cut -d " " -f 1)"
-USERHOME="$(eval echo "~$USER")"
+USER="bulwark"
+USERHOME="/home/bulwark"
 
 echo "Shutting down wallet..."
 if [ -e /etc/systemd/system/bulwarkd.service ]; then
   systemctl stop bulwarkd
 else
-  su -c "bulwark-cli stop" "$USER"
+  su -c "bulwark-cli stop" "bulwark"
 fi
 
 if grep -q "ARMv7" /proc/cpuinfo; then
@@ -54,7 +54,7 @@ if [ -e /usr/bin/bulwark-cli ];then rm -rf /usr/bin/bulwark-cli; fi
 if [ -e /usr/bin/bulwark-tx ];then rm -rf /usr/bin/bulwark-tx; fi
 
 # Remove addnodes from bulwark.conf
-sed -i '/^addnode/d' "$USERHOME/.bulwark/bulwark.conf"
+sed -i '/^addnode/d' "/home/bulwark/.bulwark/bulwark.conf"
 
 # Add Fail2Ban memory hack if needed
 if ! grep -q "ulimit -s 256" /etc/default/fail2ban; then
@@ -97,7 +97,7 @@ clear
 
 echo "Your wallet is syncing. Please wait for this process to finish."
 
-until su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" "$USER"; do
+until su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" "bulwark"; do
   for (( i=0; i<${#CHARS}; i++ )); do
     sleep 2
     echo -en "${CHARS:$i:1}" "\\r"
