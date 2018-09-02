@@ -285,7 +285,7 @@ until  ! sudo systemctl is-active --quiet bulwarkd; do sleep 1; done
 sudo systemctl start bulwarkd
 
 # Wait for bulwarkd to open up again
-until sudo su -c "bulwark-cli getinfo" bulwark; do sleep 1; done
+until sudo su -c "bulwark-cli getinfo &> /dev/null" bulwark; do sleep 1; done
 
 # Unlock the wallet for a long time period
 sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 9999999999 true" bulwark
