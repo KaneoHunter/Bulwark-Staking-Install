@@ -335,7 +335,7 @@ physical copy of this information.
 If you have any concerns, we encourage you to contact us via any of our
 social media channels.
 
-WRITE 
+WRITE THIS INFORMATION DOWN. 
 
 EOL
 
