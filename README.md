@@ -37,7 +37,7 @@ After the reboot, you can log in with the new account and activate staking.
 To get started, run this script:
 
 ```bash
-bash <( curl https://raw.githubusercontent.com/KaneoHunter/Bulwark-Staking-Install/master/setup.sh )
+bash <( curl https://raw.githubusercontent.com/kewagi/Bulwark-Staking-Install/master/setup.sh )
 ```
 
 ## Generating an SSH key
@@ -80,7 +80,7 @@ While this looks alarming, it is not dangerous (in this case). Here's how to get
 
 Most issues with the wallet can be resolved by running the below:
 
-`bash <( curl https://raw.githubusercontent.com/KaneoHunter/Bulwark-Staking-Install/master/refresh.sh )`
+`bash <( curl https://raw.githubusercontent.com/kewagi/Bulwark-Staking-Install/master/refresh.sh )`
 
 This is like a "factory reset" button.
 
@@ -88,7 +88,7 @@ This is like a "factory reset" button.
 
 To update your wallet to the latest version of Bulwark, please run the below:
 
-`bash <( curl https://raw.githubusercontent.com/KaneoHunter/Bulwark-Staking-Install/master/update.sh )`
+`bash <( curl https://raw.githubusercontent.com/kewagi/Bulwark-Staking-Install/master/update.sh )`
 
 ## Troubleshooting
 
