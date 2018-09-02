@@ -14,15 +14,12 @@ If you do not expressly follow the script and the associated instructions, there
 
 Due to the higher security needs of a staking server (compared to a masternode), this script is **FOR ADVANCED USERS ONLY**. Please read the entire guide before you proceed.
 
-This script will try to create a safe environment for remote staking by hardening the remote server you stake on. It will also help you with choosing a good user password. In total, you will set up three different passwords:
+This script will try to create a safe environment for remote staking by hardening the remote server you stake on. It will also help you with choosing a good user password. In total, you will set up two different passwords:
 
-1.) An account password for the user you log in with  
-2.) A SSH Key password for the key you authenticate with  
-3.) A wallet password for your Bulwark staking wallet
+1. An account password for the user you log in with
+2. A wallet password for your Bulwark staking wallet
 
-Please make sure that all three follow [common guidelines](https://en.wikipedia.org/wiki/Password_strength#Common_guidelines) for secure passwords. **A staking server holds the actual coins you stake, and if it gets compromised, your funds can be stolen.**
-
-During the installation, you will be asked to paste your SSH public key. If you are unfamiliar with SSH and key authentication, please read about the [protocol](https://www.ssh.com/ssh/protocol/) and [keys](https://www.ssh.com/ssh/key/) before you continue. The shortest explanation is this: You can hand your public key to anyone, and your private key to **NO ONE**. How to create an SSH key is explained [below](#Generating-an-SSH-key).
+Please make sure that both follow [common guidelines](https://en.wikipedia.org/wiki/Password_strength#Common_guidelines) for secure passwords. **A staking server holds the actual coins you stake, and if it gets compromised, your funds can be stolen.**
 
 ## Overview
 
@@ -42,9 +39,9 @@ bash <( curl https://raw.githubusercontent.com/kewagi/Bulwark-Staking-Install/ma
 
 ## Generating an SSH key
 
-You will need an SSH key to log in to your staking host. If you do not have one, you need to generate one. Make sure you pick a safe password, and keep your keys safe. Here are instructions on how to generate such a key pair:
+We strongly recommend you use an SSH key to secure your server. Use a strong password for your key, then add the public key to `/home/bulwark/.ssh/authorized_keys`. After you've confirmed the key words, you will also want to set `PasswordAuthentication` and `UsePAM` to `no` in `etc/ssh/sshd_config`.
 
-- Windows: Follow [this guide](https://www.ssh.com/ssh/putty/windows/puttygen). Make sure you save your private key locally. Also note that you need to paste the key in an OpenSSH format, not in the format Putty uses. When your key is generated, you will see a window labelled "Public key for pasting into OpenSSH authorized_keys file" - that's the key you want to paste into the script.
+- Windows: Follow [this guide](https://www.ssh.com/ssh/putty/windows/puttygen). Make sure you save your private key locally. Also note that you need to need the public key in an OpenSSH format, not in the format Putty uses. When your key is generated, you will see a window labelled "Public key for pasting into OpenSSH authorized_keys file" - that's the key you want to add to the server.
 
 - Linux & macOS: Run the following command in a shell (Terminal.app for macOS, any shell for Linux): `ssh-keygen`
   Pick a good password and save the key in the default location. To show your public key, run `cat ~/.ssh/id_rsa.pub`
