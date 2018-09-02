@@ -335,6 +335,8 @@ physical copy of this information.
 If you have any concerns, we encourage you to contact us via any of our
 social media channels.
 
+WRITE 
+
 EOL
 
 until [  "$CONFIRMATION" = "I have read the above and agree"  ]; do
@@ -532,6 +534,12 @@ The first time you try to log in after the reboot, you will get the following er
 
 Don't be alarmed, this is not because you were attacked, but because we set a different 
 host key to be used for SSH. Please refer to the README on how to fix this.
+
+As a reminder, here is your staking address: ${STAKINGADDRESS}
+
+And here is your BIP38 information:
+
+${BIP38}
 
 EOL
 sleep 5
