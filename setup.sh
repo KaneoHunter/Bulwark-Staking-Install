@@ -54,7 +54,8 @@ clear
 
 # Install basic tools
 echo "Preparing installation..."
-sudo apt-get install git dnsutils systemd libpam-cracklib -y > /dev/null 2>&1
+sudo apt-get update
+sudo apt-get install git dnsutils systemd libpam-cracklib -y
 
 # Check for systemd
 sudo systemctl --version >/dev/null 2>&1 || { echo "systemd is required. Are you using Ubuntu 16.04?"  >&2; exit 1; }
