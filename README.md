@@ -37,7 +37,7 @@ To get started, run this script:
 bash <( curl https://raw.githubusercontent.com/bulwark-crypto/Bulwark-Staking-Install/master/setup.sh )
 ```
 
-## Generating an SSH key
+## Generating an SSH key (Optional)
 
 We strongly recommend you use an SSH key to secure your server. Use a strong password for your key, then add the public key to `/home/bulwark/.ssh/authorized_keys`. After you've confirmed the key words, you will also want to set `PasswordAuthentication` and `UsePAM` to `no` in `etc/ssh/sshd_config`.
 
@@ -46,7 +46,7 @@ We strongly recommend you use an SSH key to secure your server. Use a strong pas
 - Linux & macOS: Run the following command in a shell (Terminal.app for macOS, any shell for Linux): `ssh-keygen`
   Pick a good password and save the key in the default location. To show your public key, run `cat ~/.ssh/id_rsa.pub`
 
-## REMOTE HOST IDENTIFICATION HAS CHANGED
+## REMOTE HOST IDENTIFICATION HAS CHANGED (Only if you followed the SSH key generation guide)
 
 During the installation, the staking script will change the order of the SSH host keys for security reasons. As a result, the next time you log into your VPS or Raspberry Pi, you will get the following warning:
 
