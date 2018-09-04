@@ -46,7 +46,7 @@ We strongly recommend you use an SSH key to secure your server. Use a strong pas
 - Linux & macOS: Run the following command in a shell (Terminal.app for macOS, any shell for Linux): `ssh-keygen`
   Pick a good password and save the key in the default location. To show your public key, run `cat ~/.ssh/id_rsa.pub`
 
-## REMOTE HOST IDENTIFICATION HAS CHANGED (Only if you followed the SSH key generation guide)
+## REMOTE HOST IDENTIFICATION HAS CHANGED
 
 During the installation, the staking script will change the order of the SSH host keys for security reasons. As a result, the next time you log into your VPS or Raspberry Pi, you will get the following warning:
 
