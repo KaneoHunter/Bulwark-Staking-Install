@@ -34,7 +34,7 @@ After the reboot, you can log in with the new account and activate staking.
 To get started, run this script:
 
 ```bash
-bash <( curl https://raw.githubusercontent.com/kewagi/Bulwark-Staking-Install/master/setup.sh )
+bash <( curl https://raw.githubusercontent.com/bulwark-crypto/Bulwark-Staking-Install/master/setup.sh )
 ```
 
 ## Generating an SSH key
