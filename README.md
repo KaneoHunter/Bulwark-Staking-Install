@@ -134,7 +134,7 @@ systemctl restart bulwarkd
 This means your wallet isn't unlocked, just run the below:
 
 ```bash
-bulwark-cli walletpassphrase '<YOUR PASSWORD>' 99999999 true
+bulwark-decrypt
 ```
 
 This will unlock your wallet for staking only for a long time period.
@@ -170,7 +170,7 @@ systemctl start bulwarkd
 then wait 10 minutes more, before unlocking the wallet with the command:
 
 ```bash
-bulwark-cli walletpassphrase '<YOUR PASSWORD>' 99999999 true
+bulwark-decrypt
 ```
 
 ### Staking status
