@@ -269,7 +269,7 @@ sudo systemctl start bulwarkd
 until sudo su -c "bulwark-cli getinfo &> /dev/null" bulwark; do sleep 1; done
 
 # Unlock the wallet for a long time period
-sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 9999999999 true" bulwark
+sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 0 true" bulwark
 
 # Create decrypt.sh and service
 
@@ -294,7 +294,7 @@ until sudo su -c "bulwark-cli getstakingstatus | grep walletunlocked | grep true
 
   #ask for password and attempt it
   read -e -s -p "Please enter a password to decrypt your staking wallet. Your password will not show as you type : " ENCRYPTIONKEY
-  sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 99999999 true" bulwark
+  sudo su -c "bulwark-cli walletpassphrase '$ENCRYPTIONKEY' 0 true" bulwark
 done
 
 # Tell user all was successful
