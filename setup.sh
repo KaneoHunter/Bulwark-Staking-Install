@@ -3,6 +3,9 @@
 #turn off history logging
 set +o history
 
+#trap ctrl-c input
+trap "echo Right click to copy" INT
+
 # Check if we have enough memory
 if [[ $(free -m | awk '/^Mem:/{print $2}') -lt 850 ]]; then
   echo "This installation requires at least 1GB of RAM.";
@@ -46,6 +49,11 @@ responsibility of the user.
 If you do not expressly follow the script and the associated instructions, 
 there is a very real chance your coins will be rendered inaccessible. 
 Bulwark takes no responsibility for any coins that are lost or stolen.
+
+As a further note, to PASTE in PuTTY, right-click with your mouse in
+the PuTTY window. To COPY, simply use your mouse to highlight the text,
+as ctrl-c will terminate the script early, meaning you will have to wipe
+and start over.
 
 EOL
 read -rp "Press Ctrl-C to abort or any other key to continue. " -n1 -s
@@ -282,6 +290,9 @@ sudo tee &> /dev/null /usr/local/bin/bulwark-decrypt << EOL
 
 # Stop writing to history
 set +o history
+
+# Trap ctrl-c input
+trap "echo Right click to copy" INT
 
 # Confirm wallet is synced
 until sudo su -c "bulwark-cli mnsync status 2>/dev/null | grep '\"IsBlockchainSynced\" : true' > /dev/null" bulwark; do
